@@ -1,0 +1,99 @@
+#!/bin/bash
+
+# =============================================================================
+# Pre-commit hook for PestPac Mobile
+# Runs advisory checks on every git commit (Checks 2–4).
+# Check 1 (commit message format) lives in .git/hooks/commit-msg.
+# =============================================================================
+
+# =============================================================================
+# CHECK 2 — Build solution (ADVISORY)
+# =============================================================================
+echo ""
+echo "┌─────────────────────────────────────────────────┐"
+echo "│  Check 2: dotnet build                          │"
+echo "└─────────────────────────────────────────────────┘"
+
+BUILD_OUTPUT=$(dotnet build 2>&1)
+BUILD_EXIT=$?
+
+if [ $BUILD_EXIT -ne 0 ]; then
+  echo "⚠ WARNING: Build failed (advisory only — commit will proceed)."
+  echo ""
+  echo "$BUILD_OUTPUT"
+else
+  echo "✓ Build succeeded."
+fi
+
+# =============================================================================
+# CHECK 3 — Run unit tests (ADVISORY)
+# =============================================================================
+echo ""
+echo "┌─────────────────────────────────────────────────┐"
+echo "│  Check 3: dotnet test                           │"
+echo "└─────────────────────────────────────────────────┘"
+
+TEST_OUTPUT=$(dotnet test 2>&1)
+TEST_EXIT=$?
+
+# Detect "no test projects found" scenarios
+if echo "$TEST_OUTPUT" | grep -qiE 'no test project|no projects|no test assemblies|could not find'; then
+  echo "ℹ No test projects found yet — skipping."
+elif [ $TEST_EXIT -ne 0 ]; then
+  echo "⚠ WARNING: Tests failed (advisory only — commit will proceed)."
+  echo ""
+  echo "$TEST_OUTPUT"
+else
+  echo "✓ All tests passed."
+fi
+
+# =============================================================================
+# CHECK 4 — Standards advisory via Claude Code CLI (ADVISORY)
+#
+# NOTE: This check requires the Claude Code CLI ('claude') to be available in
+# the terminal context from which you are committing (i.e., it must be on your
+# PATH). It pipes the staged diff to Claude using /standards-check rather than
+# full file context, so results may be less complete than running /standards-check
+# directly inside Rider with access to the full codebase.
+# =============================================================================
+echo ""
+echo "┌─────────────────────────────────────────────────┐"
+echo "│  Check 4: Standards advisory (Claude)           │"
+echo "└─────────────────────────────────────────────────┘"
+
+DIFF=$(git diff --cached)
+DIFF_LINES=$(echo "$DIFF" | wc -l | tr -d ' ')
+
+if [ -z "$DIFF" ]; then
+  echo "ℹ No staged diff — skipping standards check."
+elif [ "$DIFF_LINES" -gt 500 ]; then
+  echo "ℹ Diff is $DIFF_LINES lines (> 500) — skipping automated standards review."
+  echo "  Consider running /standards-check manually in Rider for large changes."
+else
+  echo "ℹ Diff is $DIFF_LINES lines — running standards advisory..."
+  echo ""
+
+  if ! command -v claude &>/dev/null; then
+    echo "⚠ Claude Code CLI not found in PATH — skipping standards check."
+    echo "  Install Claude Code or ensure 'claude' is on your PATH to enable this check."
+  else
+    STANDARDS_OUTPUT=$(echo "$DIFF" | claude --print \
+      "Run /standards-check against this diff. Flag any violations of WorkWave coding standards including naming conventions, architectural patterns, error handling, and mobile-specific concerns. Output as a short bullet list. No code suggestions." \
+      2>&1)
+    CLAUDE_EXIT=$?
+
+    if [ $CLAUDE_EXIT -ne 0 ]; then
+      echo "⚠ Standards check failed to run (advisory only — commit will proceed)."
+      echo "$STANDARDS_OUTPUT"
+    else
+      echo "Standards advisory:"
+      echo ""
+      echo "$STANDARDS_OUTPUT"
+    fi
+  fi
+fi
+
+echo ""
+echo "Pre-commit checks complete. Proceeding with commit."
+echo ""
+exit 0
