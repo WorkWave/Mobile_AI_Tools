@@ -12,6 +12,8 @@ and test suite have all been reviewed and confirmed.
 ## Workflow Overview
 
 ```
+Step 0  — Jira Story    ask for story number → /jira-story-check → pull story via MCP
+           ↓ [gate: fail if ❌ results unless user chooses to proceed]
 Phase 0 — Brainstorm    superpowers:brainstorming
            ↓ [review gate]
 Phase 1 — Spec          /spec
@@ -22,7 +24,8 @@ Phase 3 — Adversarial   /adversarial-check
            ↓ [review gate]
 Phase 4 — Tests         /tests
            ↓ [review gate — confirm tests compile and fail correctly]
-Phase 5 — Implement     superpowers:test-driven-development → write code
+Phase 5 — Implement     superpowers:test-driven-development → decompose into parallel
+                        workstreams → subagents for parallel implementation
                         → dotnet build → debug if failed → commit per unit
            ↓ [review gate]
 Phase 6 — Verify        run tests → superpowers:systematic-debugging (if failures)
@@ -31,6 +34,52 @@ Phase 6 — Verify        run tests → superpowers:systematic-debugging (if fai
 
 At every review gate, stop and wait for explicit confirmation before proceeding.
 Do not skip phases or combine phases without the user's instruction.
+
+---
+
+## Step 0 — Jira Story Validation & Context
+
+### 1. Ask for the Jira story number
+
+Ask the user:
+> "What is the Jira story number for this implementation? (e.g. MOB-12345)"
+
+Wait for the user to provide the story number before continuing.
+
+### 2. Run /jira-story-check
+
+Execute the `/jira-story-check` command on the provided story number.
+
+### 3. Handle validation results
+
+If the story has any ❌ Fail results, display them clearly and ask:
+
+> "This story has validation failures:
+>
+> {list each ❌ Fail result}
+>
+> Would you like to:
+> 1. Stop and fix the story first
+> 2. Proceed anyway (not recommended)"
+
+**Wait for the user's response before continuing.** If the user chooses option 1, stop completely. If the user chooses option 2, note the failures and continue.
+
+If the story passes all checks, proceed directly to step 4.
+
+### 4. Pull full story content via Atlassian MCP
+
+Use the `mcp__claude_ai_Atlassian__getJiraIssue` tool to fetch the full story content.
+Extract and make available as context for all subsequent phases:
+
+- **Title** — the story summary
+- **Description** — full story description and background
+- **Acceptance Criteria** — all AC from the story (check both description body and custom AC field)
+- **Figma link** — any Figma design URL found in the description or attachments (save this for Phase 5)
+
+This context replaces the need for the user to manually provide story details in subsequent phases.
+All phases should reference this pulled story content rather than asking the user to re-describe the feature.
+
+**Proceed to Phase 0 — Brainstorm.**
 
 ---
 
@@ -138,6 +187,20 @@ of implementation is driven by a failing test, not written speculatively.
 Then write the implementation. Follow all project conventions detected in Phase 1
 and address all standards findings from Phase 2.
 
+### Parallel workstreams
+
+Decompose the implementation plan into independent workstreams before writing any code.
+Identify which units of work have no dependencies on each other and can be implemented
+simultaneously. Use subagents (via `superpowers:dispatching-parallel-agents`) to implement
+independent workstreams in parallel rather than implementing everything sequentially.
+Only implement units sequentially when one genuinely depends on the output of another.
+
+### Figma UI components
+
+If the Jira story pulled in Step 0 contains a Figma design link, use the
+`/mobile-ui-builder` command to generate UI components from that Figma design as part
+of the implementation. Do not skip this step if a Figma link is present.
+
 **Implementation rules:**
 
 ### Scope
@@ -153,13 +216,6 @@ and address all standards findings from Phase 2.
 - [ ] Proxy methods declared `public virtual`
 - [ ] Singleton registered in `Bootstrap.cs`
 - [ ] Domain docs created or updated: `docs/domains/{domain}.md`
-
-### File creation checklist (Repository pattern)
-- [ ] Entity class created in correct data layer folder
-- [ ] Repository class created inheriting from base repository
-- [ ] Command/Query classes created for each stored procedure
-- [ ] Tenant key passed through all constructors
-- [ ] Builder/Converter class created for data-to-DTO transformation
 
 ### During implementation
 - Apply mitigations from the adversarial findings as you write each method
@@ -182,11 +238,23 @@ and address all standards findings from Phase 2.
    - Repeat until the build is clean
    - Do not commit, do not ask the user to fix it, and do not move to the next unit
      until the build passes
-3. If the build **passes**, commit the unit, then ask:
-   > "Build passed. I've committed `{unit description}`. Does this look right before
-   > I continue to the next unit?"
+3. If the build **passes**, prompt the user with a proposed commit message and ask for
+   confirmation before committing:
+   > "Build passed. Ready to commit this unit. Proposed commit message:
+   >
+   > `[{JIRA-STORY-NUMBER}] {unit description}`
+   >
+   > Confirm to commit, or tell me what to change."
 
-**Do not write all files at once without intermediate review. Do not commit a broken build.**
+   Wait for the user to confirm the commit message before running `git commit`.
+   The commit message **must** follow the pattern `[MOB-XXXXX] description` using the
+   story number collected in Step 0.
+
+4. After the user confirms, commit and ask:
+   > "Committed. Does this look right before I continue to the next unit?"
+
+**Do not write all files at once without intermediate review. Do not commit a broken build.
+Do not commit without user confirmation of the commit message.**
 
 ---
 
