@@ -1,0 +1,9 @@
+{
+  "mobile-ui-builder": {
+    "type": "stdio",
+    "command": "${CLAUDE_PLUGIN_ROOT}/start-server.sh",
+    "env": {
+      "FIGMA_TOKEN": "${FIGMA_TOKEN}"
+    }
+  }
+}

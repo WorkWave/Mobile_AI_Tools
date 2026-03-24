@@ -1,0 +1,25 @@
+{
+  "name": "WorkWave-Mobile-AI-Tools",
+  "description": "WorkWave mobile AI tools and plugins",
+  "owner": {
+    "name": "WorkWave"
+  },
+  "plugins": [
+    {
+      "name": "mobile-ui-builder",
+      "description": "Validates and generates iOS storyboards and Android layouts.",
+      "version": "1.0.0",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/WorkWave/Mobile_AI_Tools.git",
+        "path": "Plugins/mobile-ui-builder-mcp"
+      },
+      "author": {
+        "name": "WorkWave"
+      }
+    }
+  ],
+  "visibility": "private",
+  "categories": ["mobile", "ui"],
+  "tags": ["ios", "android", "storyboard", "layout"]
+}
