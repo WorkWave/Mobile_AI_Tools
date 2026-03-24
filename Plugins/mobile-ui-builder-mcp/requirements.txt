@@ -1,3 +1,2 @@
 mcp==1.26.0
 pytest==8.3.5
-svg2vectordrawable==2.5.2
