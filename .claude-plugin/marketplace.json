@@ -6,7 +6,7 @@
   },
   "plugins": [
     {
-      "name": "mobile-ui-builder",
+      "name": "mobile-workflow",
       "description": "Validates and generates iOS storyboards and Android layouts.",
       "version": "1.0.0",
       "source": {
