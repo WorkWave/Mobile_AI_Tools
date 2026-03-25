@@ -16,7 +16,7 @@ estimate complexity, and identify gaps in the story before the meeting.
 
 If the story number was not provided at invocation, ask the user for it now.
 
-Use the Atlassian MCP server to fetch the full story (title, description, AC, labels, status, issue type).
+Use the Atlassian MCP server to fetch the full story. Always explicitly request the following fields: `summary`, `description`, `status`, `issuetype`, `assignee`, `labels`, `parent`, `customfield_10014` (Epic Link). The `parent` field is not returned by default and must be requested explicitly — omitting it will cause parent epic detection to silently fail.
 
 ---
 
@@ -73,8 +73,12 @@ After fetching a non-epic issue, check whether it belongs to a parent epic:
 
 ## Step 2 — Pull Figma Design
 
-If a Figma URL exists in the story, use the Figma MCP server to pull design details.
-If no link exists, flag it as missing and continue — do not stop.
+Look for a Figma URL in the following locations (in order):
+1. Any dedicated Figma link field on the issue
+2. The story's `description` field — scan the full text for any URL containing `figma.com`
+
+If a Figma URL is found in any of these locations, use the Figma MCP server to pull design details.
+If no link exists in any location, flag it as missing and continue — do not stop.
 
 ---
 
@@ -124,9 +128,17 @@ Using the Atlassian MCP, fetch all items linked to the story (sub-tasks, blocker
 
 Check for required story components. Flag any that are missing with ⚠️ but do not stop — continue to analysis regardless.
 
+**Locating Acceptance Criteria:**
+AC may live in a dedicated Jira field, or embedded in the description. When checking for AC, look in the following order:
+1. A dedicated Acceptance Criteria field on the issue
+2. A section in the description headed **"Acceptance Criteria"** (exact or case-insensitive match)
+3. A section in the description headed **"Requirements"** (exact or case-insensitive match)
+
+If AC is found in the description, extract that section and treat it as the AC for all subsequent analysis. If none of the above locations contain AC, flag it as missing.
+
 Required components:
 - Description present and non-empty
-- Acceptance criteria present and non-empty
+- Acceptance criteria present and non-empty (using the lookup order above)
 - AC covers all scenarios described in the description
 - Figma design linked (flag if missing — note whether a design is likely needed based on the story type)
 

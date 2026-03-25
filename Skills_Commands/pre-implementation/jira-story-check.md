@@ -34,9 +34,9 @@ Record the result of each as ✅ Pass, ⚠️ Note, or ❌ Fail, then continue t
 | Product field | Product field is populated | ❌ Fail if empty — note and continue |
 | Blocked status | Story is not marked blocked | ❌ Fail — show blocked reason — note and continue |
 | Description | Description present and non-empty | ❌ Fail if missing — note and continue |
-| Acceptance criteria | AC present and non-empty | ❌ Fail if missing — note and continue |
+| Acceptance criteria | AC custom field present and non-empty, OR description contains a non-empty "Acceptance Criteria" or "Requirements" section | ❌ Fail if neither found — note and continue |
 | AC coverage | AC covers all scenarios in description | ⚠️ Note gaps — do not fail |
-| Figma link | Figma URL present | ⚠️ Note if missing — do not fail |
+| Figma link | Figma URL present in the dedicated Figma field OR anywhere in the description | ⚠️ Note if missing — do not fail |
 | Work breakdown | WorkBreakdown field is populated | ❌ Fail if empty — note and continue |
 
 ---
