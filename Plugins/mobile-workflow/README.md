@@ -57,8 +57,8 @@ This is the easiest way to get the MCP server, skills, and agents all configured
 **Step 1** — Clone the repository and set up the Python environment:
 
 ```bash
-git clone <repo-url> ~/mobile-ui-builder-mcp
-cd ~/mobile-ui-builder-mcp
+git clone <repo-url> ~/mobile-workflow
+cd ~/mobile-workflow
 python3 -m venv .venv
 .venv/bin/pip install -r requirements.txt
 ```

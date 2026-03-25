@@ -13,7 +13,9 @@ image assets for one screen. Work only inside iOS project files — do not touch
 - xcassets path:    {{xcassets_path}}           (e.g. PP.Mobile.IOS/Resources/Images.xcassets/)
 - ViewController:   {{vc_class_name}}           (e.g. WAIveChatVC)
 - Base VC class:    SubscribeBaseVC             (UIViewController subclass used in this project)
-- Design input:     {{figma_url_or_image_path}} (Figma URL or absolute path to screenshot/image)
+- Figma URL:        {{figma_url}}               (original Figma URL — used for asset export; empty if input is a local image)
+- Generation input: {{generation_input}}         (local image path for image-based generation; empty when layout_json is provided)
+- Layout JSON:      {{layout_json}}              (pre-built iOS layout JSON from orchestrator; empty when generation_input is used)
 - Assets to export: {{asset_list}}              (e.g. "close icon, logo, send icon" — or "unknown, infer from design")
 
 ## iOS conventions
@@ -42,17 +44,20 @@ image assets for one screen. Work only inside iOS project files — do not touch
 
 ## Your tasks — execute in order
 
-1. **Export assets** (if Figma URL provided)
-   - Call mcp__mobile-ui-builder__figma_export_to_xcassets for each asset
+1. **Export assets** (if {{figma_url}} is provided and non-empty)
+   - Call mcp__mobile-ui-builder__figma_export_to_xcassets for each asset using {{figma_url}}
    - Use format="pdf" for icons/logos, format="png" for photos
 
 2. **Add local assets** (if local image files provided instead of Figma)
    - Call mcp__mobile-ui-builder__add_image_to_xcassets for each asset
 
 3. **Generate storyboard**
-   - Call mcp__mobile-ui-builder__generate_ios_ui_from_image with the design input
-   - OR call mcp__mobile-ui-builder__generate_ios_ui_from_layout if a JSON spec is provided
-   - Set customClass="{{vc_class_name}}" on the view controller
+   - If {{layout_json}} is non-empty:
+     Call mcp__mobile-ui-builder__generate_ios_ui_from_layout with {{layout_json}}.
+     Set customClass="{{vc_class_name}}" on the view controller.
+   - Else:
+     Call mcp__mobile-ui-builder__generate_ios_ui_from_image with {{generation_input}} (must be a local file path).
+     Set customClass="{{vc_class_name}}" on the view controller.
 
 4. **Validate**
    - Call mcp__mobile-ui-builder__validate_ios_storyboard

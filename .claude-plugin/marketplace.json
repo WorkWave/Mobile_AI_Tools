@@ -12,7 +12,7 @@
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/WorkWave/Mobile_AI_Tools.git",
-        "path": "Plugins/mobile-ui-builder-mcp"
+        "path": "Plugins/mobile-workflow"
       },
       "author": {
         "name": "WorkWave"
