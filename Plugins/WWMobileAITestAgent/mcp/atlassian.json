@@ -1,0 +1,7 @@
+{
+  "name": "claude.ai Atlassian",
+  "type": "http",
+  "url": "https://mcp.atlassian.com/v1/mcp",
+  "description": "Atlassian MCP server — provides access to Jira issues, Confluence pages, and development panel data.",
+  "setup_instructions": "1. Go to Claude settings > MCP Servers\n2. Click 'Add MCP Server'\n3. Name: claude.ai Atlassian\n4. Type: HTTP\n5. URL: https://mcp.atlassian.com/v1/mcp\n6. Authenticate with your Atlassian account when prompted"
+}

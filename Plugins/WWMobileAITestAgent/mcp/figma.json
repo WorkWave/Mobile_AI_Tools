@@ -1,0 +1,7 @@
+{
+  "name": "claude.ai Figma",
+  "type": "http",
+  "url": "https://mcp.figma.com/v1/mcp",
+  "description": "Figma MCP server — provides access to design files, component specs, and design context.",
+  "setup_instructions": "1. Go to Claude settings > MCP Servers\n2. Click 'Add MCP Server'\n3. Name: claude.ai Figma\n4. Type: HTTP\n5. URL: https://mcp.figma.com/v1/mcp\n6. Authenticate with your Figma account when prompted"
+}

@@ -1,0 +1,22 @@
+{
+  "name": "WorkWave-Mobile-AI-Tools",
+  "owner": {
+    "name": "WorkWave"
+  },
+  "plugins": [
+    {
+      "name": "ww-mobile-ai-test-agent",
+      "description": "Automated QA testing agent for WorkWave mobile apps (PestPac, RealGreen, WinTeam, RouteManager). Ticket-driven tests, POM generation, manual test automation, and regression testing on Android and iOS.",
+      "version": "1.8.0",
+      "source": {
+        "source": "git-subdir",
+        "url": "https://github.com/WorkWave/Mobile_AI_Tools.git",
+        "path": "Plugins/WWMobileAITestAgent"
+      },
+      "author": {
+        "name": "Francesco Saffioti",
+        "email": "fsaffioti@workwave.com"
+      }
+    }
+  ]
+}
