@@ -2,9 +2,9 @@
 """
 list_devices.py — list connected Android/iOS devices and simulators.
 Usage:
-  python list_devices.py                    # both platforms
-  python list_devices.py --platform android
-  python list_devices.py --platform ios
+  python3 list_devices.py                    # both platforms
+  python3 list_devices.py --platform android
+  python3 list_devices.py --platform ios
 """
 import argparse
 import subprocess

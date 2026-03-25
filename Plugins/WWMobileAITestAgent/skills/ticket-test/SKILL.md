@@ -2,7 +2,7 @@
 name: ticket-test
 description: Test a specific Jira ticket. Fetches description and Acceptance Criteria via Atlassian MCP, retrieves Figma design if linked, identifies affected screens via GitHub branch diff, then drives Appium to test each AC. Offers regression at the end.
 ---
-> **Output directory:** Read `OUTPUT_DIR` from session memory (set by session-wizard Step 0). Use `$OUTPUT_DIR/<project>/` for all file paths instead of `projects/<project>/`.
+> **Session data:** Read `OUTPUT_DIR`, `project`, `platform`, `udid`, and `config` from session memory (set by session-wizard). If any value is missing → load from `$OUTPUT_DIR/<project>/config.json` directly before proceeding.
 
 
 # Ticket-Driven Test
@@ -88,7 +88,10 @@ AC #4: Successfully saved job appears in the schedule view
 
 ### Session Creation — Speed-Optimized
 
-Start Appium session (if not already active) using speed-optimized capabilities:
+Check Appium session state before creating:
+- If active and app is on home screen → reuse session (skip login)
+- If active but on login screen → proceed with login using session credentials
+- If not active → create new session using speed-optimized capabilities below
 
 **iOS:**
 ```python
@@ -608,5 +611,5 @@ Ticket test complete. Results:
 Do you want to run a full regression to check for side effects? (yes/no)
 ```
 
-If yes → use `regression` skill.
+If yes → use `regression-test` skill.
 Then → use `qa-report` skill.

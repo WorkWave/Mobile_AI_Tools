@@ -60,7 +60,7 @@ def main():
     parser.add_argument("--project", required=True, choices=["PestPac", "RealGreen", "WinTeam", "RouteManager"])
     parser.add_argument("--os", required=True, choices=["android", "ios"])
     parser.add_argument("--key", required=True, help="Path to Firebase service account JSON")
-    parser.add_argument("--config-dir", default="../projects", help="Path to projects/ folder")
+    parser.add_argument("--config-dir", default=None, help="Path to OUTPUT_DIR (reads ~/.claude/ww-mobile-ai-test-agent-outputdir.txt if not set)")
     parser.add_argument("--limit", type=int, default=10)
     args = parser.parse_args()
 

@@ -8,7 +8,7 @@ Parameters (parse from the command arguments):
 
 Steps:
 
-1. Load `projects/<project>/config.json` to get `firebaseAppId.<os>` and `firebaseProject`
+1. Load `$OUTPUT_DIR/<project>/config.json` to get `firebaseAppId.<os>` and `firebaseProject`
 2. Load the Firebase key path for this project from session memory (set by `setup-firebase` skill). If not set → ask: "Please provide the path to your Firebase service account keys folder."
 3. Call the Firebase App Distribution REST API directly (the Firebase CLI `appdistribution:releases:list` command is not available in this version):
 ```bash

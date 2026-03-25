@@ -3,7 +3,7 @@ name: codebase-screen-discovery
 description: Analyze the .NET Xamarin/MAUI mobile repository (always on dev branch) to map navigation structure, screens, routes, and ViewModels. Saves to codebase_navigation_map.json, then merges into navigation_map.json. Skips if the git commit hash hasn't changed since last analysis.
 ---
 
-> **Output directory:** Read `OUTPUT_DIR` from session memory (set by session-wizard Step 0). Use `$OUTPUT_DIR/<project>/` for all file paths instead of `projects/<project>/`.
+> **Session data:** Read `OUTPUT_DIR`, `project`, `platform`, `udid`, and `config` from session memory (set by session-wizard). If any value is missing → load from `$OUTPUT_DIR/<project>/config.json` directly before proceeding.
 
 # Codebase Screen Discovery
 

@@ -2,9 +2,9 @@
 """
 install_build.py — install a .apk or .ipa on a connected device or simulator.
 Usage:
-  python install_build.py --platform android --udid emulator-5554 --file builds/app.apk
-  python install_build.py --platform ios --udid <sim-udid> --file builds/app.ipa
-  python install_build.py --platform ios --udid <physical-udid> --file builds/app.ipa --physical
+  python3 install_build.py --platform android --udid emulator-5554 --file builds/app.apk
+  python3 install_build.py --platform ios --udid <sim-udid> --file builds/app.ipa
+  python3 install_build.py --platform ios --udid <physical-udid> --file builds/app.ipa --physical
 """
 import argparse
 import subprocess

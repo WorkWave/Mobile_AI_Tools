@@ -3,7 +3,7 @@ name: automated-screen-discovery
 description: After login, systematically explore the running app via Appium to map all screens, navigation hierarchy, and interactive elements. Saves to appium_navigation_map.json, then merges into navigation_map.json. Skip if map already exists and app commit hash hasn't changed.
 ---
 
-> **Output directory:** Read `OUTPUT_DIR` from session memory. All files go to `$OUTPUT_DIR/<project>/nav_maps/`.
+> **Session data:** Read `OUTPUT_DIR`, `project`, `platform`, `udid`, and `config` from session memory (set by session-wizard). If any value is missing → load from `$OUTPUT_DIR/<project>/config.json` directly before proceeding.
 
 ## Pre-flight Check
 

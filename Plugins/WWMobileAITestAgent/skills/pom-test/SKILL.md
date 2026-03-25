@@ -2,7 +2,7 @@
 name: pom-test
 description: Generate Page Object Model test files for every screen in navigation_map.json using pytest + appium-python-client. Output to $OUTPUT_DIR/<project>/test-pom-generated/.
 ---
-> **Output directory:** Read `OUTPUT_DIR` from session memory (set by session-wizard Step 0). Use `$OUTPUT_DIR/<project>/` for all file paths instead of `projects/<project>/`.
+> **Session data:** Read `OUTPUT_DIR`, `project`, `platform`, `udid`, and `config` from session memory (set by session-wizard). If any value is missing → load from `$OUTPUT_DIR/<project>/config.json` directly before proceeding.
 
 
 # POM Auto-Generation
@@ -25,7 +25,7 @@ $OUTPUT_DIR/<project>/test-pom-generated/
 
 Reusable standalone scripts (imports shared helpers):
 ```
-$OUTPUT_DIR/<project>/auto-generated-scripts/pom-test-scripts/
+$OUTPUT_DIR/<project>/auto-generated-scripts/pom-tests-scripts/
 ├── ios/
 │   ├── run_smoke.py
 │   ├── run_all.py
@@ -228,7 +228,7 @@ After all POM files:
 ## Autoscripts Generation
 
 After POM generation, also generate scripts in
-`$OUTPUT_DIR/<project>/auto-generated-scripts/pom-test-scripts/`.
+`$OUTPUT_DIR/<project>/auto-generated-scripts/pom-tests-scripts/`.
 
 Ensure `auto-generated-scripts/helpers/` exists with shared files
 (`session.py`, `login.py`, `navigation.py`, `ios/session.py`, `ios/permissions.py`,
@@ -236,7 +236,7 @@ Ensure `auto-generated-scripts/helpers/` exists with shared files
 
 Generate for BOTH platforms if nav map was built from both, otherwise only for the current platform.
 
-### pom-test-scripts/ios/run_smoke.py
+### pom-tests-scripts/ios/run_smoke.py
 
 ```python
 """
@@ -290,7 +290,7 @@ if __name__ == "__main__":
     main()
 ```
 
-### pom-test-scripts/android/run_smoke.py
+### pom-tests-scripts/android/run_smoke.py
 
 Same structure. Differences:
 - `from helpers.android.session import create_session`
@@ -299,7 +299,7 @@ Same structure. Differences:
 - `create_session(UDID, APP_PACKAGE, APP_ACTIVITY)`
 - Tab assertion: `find(S, "class name", "android.view.ViewGroup", timeout=3)`
 
-### pom-test-scripts/ios/screens/<screen>.py (one per screen)
+### pom-tests-scripts/ios/screens/<screen>.py (one per screen)
 
 ```python
 """
@@ -348,13 +348,13 @@ Display after generation:
    Autoscripts iOS            : N screens + run_smoke.py + run_all.py
    Autoscripts Android        : N screens + run_smoke.py + run_all.py
    Primary output             : $OUTPUT_DIR/<project>/test-pom-generated/
-   Autoscripts iOS            : $OUTPUT_DIR/<project>/auto-generated-scripts/pom-test-scripts/ios/
-   Autoscripts Android        : $OUTPUT_DIR/<project>/auto-generated-scripts/pom-test-scripts/android/
+   Autoscripts iOS            : $OUTPUT_DIR/<project>/auto-generated-scripts/pom-tests-scripts/ios/
+   Autoscripts Android        : $OUTPUT_DIR/<project>/auto-generated-scripts/pom-tests-scripts/android/
 
 Run POM tests (iOS):
   cd "$OUTPUT_DIR/<project>/test-pom-generated"
   pytest tests/ --platform ios --device-udid <udid> --bundle-id <bundleId> -v
 
 Run autoscripts smoke (iOS):
-  python "$OUTPUT_DIR/<project>/auto-generated-scripts/pom-test-scripts/ios/run_smoke.py"
+  python "$OUTPUT_DIR/<project>/auto-generated-scripts/pom-tests-scripts/ios/run_smoke.py"
 ```

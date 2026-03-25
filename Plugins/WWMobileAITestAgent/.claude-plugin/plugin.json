@@ -1,7 +1,7 @@
 {
   "name": "ww-mobile-ai-test-agent",
   "description": "Automated QA testing agent for WorkWave mobile apps (PestPac, RealGreen, WinTeam, RouteManager). Ticket-driven tests, POM generation, workflow test automation, and regression testing on Android and iOS.",
-  "version": "1.8.0",
+  "version": "1.9.0",
   "author": {
     "name": "Francesco Saffioti",
     "email": "fsaffioti@workwave.com"

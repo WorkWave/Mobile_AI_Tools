@@ -2,7 +2,7 @@
 name: workflow-test
 description: Execute a structured test workflow from a markdown file in $OUTPUT_DIR/<project>/test-workflow/. Creates a starter file if none exists. Runs each phase sequentially via Appium.
 ---
-> **Output directory:** Read `OUTPUT_DIR` from session memory (set by session-wizard Step 0). Use `$OUTPUT_DIR/<project>/` for all file paths instead of `projects/<project>/`.
+> **Session data:** Read `OUTPUT_DIR`, `project`, `platform`, `udid`, and `config` from session memory (set by session-wizard). If any value is missing → load from `$OUTPUT_DIR/<project>/config.json` directly before proceeding.
 
 
 # test-workflow
@@ -16,7 +16,7 @@ $OUTPUT_DIR/<project>/test-workflow/
 
 Generated reusable scripts:
 ```
-$OUTPUT_DIR/<project>/auto-generated-scripts/workflow-test-scripts/
+$OUTPUT_DIR/<project>/auto-generated-scripts/workflow-tests-scripts/
 ├── ios/
 │   └── <workflow_filename>.py
 └── android/
@@ -208,8 +208,8 @@ Phase 3: Home Screen ─ 2/3 steps passed ⚠️
 
 After all phases complete, generate a Python script and save to:
 
-- iOS:     `$OUTPUT_DIR/<project>/auto-generated-scripts/workflow-test-scripts/ios/<workflow_filename>.py`
-- Android: `$OUTPUT_DIR/<project>/auto-generated-scripts/workflow-test-scripts/android/<workflow_filename>.py`
+- iOS:     `$OUTPUT_DIR/<project>/auto-generated-scripts/workflow-tests-scripts/ios/<workflow_filename>.py`
+- Android: `$OUTPUT_DIR/<project>/auto-generated-scripts/workflow-tests-scripts/android/<workflow_filename>.py`
 
 `<workflow_filename>` = `.md` filename without extension, spaces replaced with `_`
 (e.g. `full-app-workflow.md` → `full_app_workflow.py`)

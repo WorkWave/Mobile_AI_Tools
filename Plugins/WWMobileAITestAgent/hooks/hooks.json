@@ -2,11 +2,11 @@
   "hooks": {
     "SessionStart": [
       {
-        "matcher": "startup|clear|compact|test|mobile|android|ios|appium|firebase|pestpac|realgreen|winteam|routemanager",
+        "matcher": "clear|compact|test|mobile|android|ios|appium|firebase|pestpac|realgreen|winteam|routemanager",
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'WWMobileAITestAgent v1.6.0 loaded. Run /start-session to begin testing.'",
+            "command": "echo 'WWMobileAITestAgent v1.9.0 loaded. Run /start-session to begin testing.'",
             "async": false
           }
         ]

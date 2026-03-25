@@ -99,7 +99,7 @@ Tests a specific Jira ticket against its Acceptance Criteria.
 Generates pytest + Appium Page Object Model test files for every screen in the navigation map.
 
 - Creates `conftest.py`, `base_page.py`, per-screen page objects and test classes
-- Also generates standalone autoscripts in `auto-generated-scripts/pom-test-scripts/` (iOS + Android)
+- Also generates standalone autoscripts in `auto-generated-scripts/pom-tests-scripts/` (iOS + Android)
 - Output: `$OUTPUT_DIR/<project>/test-pom-generated/`
 
 Run generated tests:
@@ -162,10 +162,10 @@ WWMobileTestAgentAIResults/
 │       ├── ticket-tests-scripts/
 │       │   ├── ios/<TICKET_ID>/
 │       │   └── android/<TICKET_ID>/
-│       ├── pom-test-scripts/
+│       ├── pom-tests-scripts/
 │       │   ├── ios/
 │       │   └── android/
-│       └── workflow-test-scripts/
+│       └── workflow-tests-scripts/
 │           ├── ios/
 │           └── android/
 ├── RealGreen/  ...
@@ -173,7 +173,7 @@ WWMobileTestAgentAIResults/
 └── RouteManager/ ...
 ```
 
-The plugin folder itself only stores skills, commands, and the `outputdirectory.txt` pointer.
+The plugin folder itself only stores skills and commands. The output directory pointer is saved to `~/.claude/ww-mobile-ai-test-agent-outputdir.txt` — outside the plugin so it survives version updates.
 
 ---
 

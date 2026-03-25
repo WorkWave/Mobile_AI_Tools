@@ -7,7 +7,7 @@ These scripts work independently of Claude Code.
 Firebase service account keys must be stored in a folder (e.g. `~/.config/firebase/`):
 - `pestpac.json`, `realgreen.json`, `winteam.json`, `routemanager.json`
 
-Each `projects/<Project>/config.json` must have `firebaseAppId.android` and/or `firebaseAppId.ios` filled in before running Firebase scripts.
+Each `$OUTPUT_DIR/<Project>/config.json` must have `firebaseAppId.android` and/or `firebaseAppId.ios` filled in before running Firebase scripts.
 
 ## Setup
 
@@ -22,17 +22,17 @@ pip install -r requirements.txt
 
 | Script | Purpose | Example |
 |--------|---------|---------|
-| `check_env.py` | Verify all required SDK tools | `python check_env.py` |
-| `list_devices.py` | List connected devices & simulators | `python list_devices.py --platform android` |
-| `get_firebase_builds.py` | Fetch last 10 Firebase builds | `python get_firebase_builds.py --project RealGreen --os android --key ~/.config/firebase/realgreen.json` |
-| `download_build.py` | Download a build from Firebase | `python download_build.py --project RealGreen --os android --release-id <id> --key ~/.config/firebase/realgreen.json --out ../projects/RealGreen/builds/` |
-| `install_build.py` | Install .apk/.ipa on a device | `python install_build.py --platform android --udid emulator-5554 --file builds/app.apk` |
+| `check_env.py` | Verify all required SDK tools | `python3 check_env.py` |
+| `list_devices.py` | List connected devices & simulators | `python3 list_devices.py --platform android` |
+| `get_firebase_builds.py` | Fetch last 10 Firebase builds | `python3 get_firebase_builds.py --project RealGreen --os android --key ~/.config/firebase/realgreen.json` |
+| `download_build.py` | Download a build from Firebase | `python3 download_build.py --project RealGreen --os android --release-id <id> --key ~/.config/firebase/realgreen.json --out $OUTPUT_DIR/RealGreen/builds/` |
+| `install_build.py` | Install .apk/.ipa on a device | `python3 install_build.py --platform android --udid emulator-5554 --file builds/app.apk` |
 | `run_tests.sh` | Start Appium + run pytest suite | `./run_tests.sh --platform android --udid emulator-5554 --project RealGreen` |
 
 ## Firebase Key Setup
 
-The `projects/` folder is at `../projects` relative to the `scripts/` folder.
-Firebase App IDs must be set in each `projects/<Project>/config.json` under `firebaseAppId.android` / `firebaseAppId.ios`.
+The output folder is at `$OUTPUT_DIR` (set by session-wizard Step 0).
+Firebase App IDs must be set in each `$OUTPUT_DIR/<Project>/config.json` under `firebaseAppId.android` / `firebaseAppId.ios`.
 
 ## Running Tests Standalone
 

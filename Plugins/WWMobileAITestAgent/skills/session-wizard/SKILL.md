@@ -15,9 +15,11 @@ All generated data (builds, credentials, navigation maps, reports, generated tes
 
 ### Read saved directory
 
-Check if `outputdirectory.txt` exists in the installed plugin folder.
+The config file is stored at `~/.claude/ww-mobile-ai-test-agent-outputdir.txt` — outside the plugin folder so it survives plugin updates and version changes, and works on any machine.
 
-**If `outputdirectory.txt` exists**, read the saved path and show:
+Check if `~/.claude/ww-mobile-ai-test-agent-outputdir.txt` exists.
+
+**If it exists**, read the saved path and show:
 ```
 Output directory:
 
@@ -28,10 +30,10 @@ Output directory:
 - If [1] → use the saved path, continue to Step 1
 - If [2] or [3] → ask: "Enter the base folder path (WWMobileTestAgentAIResults will be created inside it):"
   - Resolve `~` or `%USERPROFILE%` to absolute path
-  - **Immediately** write the resolved path to `outputdirectory.txt` in the plugin folder
+  - **Immediately** write the resolved path to `~/.claude/ww-mobile-ai-test-agent-outputdir.txt`
   - Store `OUTPUT_DIR` in session memory
 
-**If `outputdirectory.txt` does NOT exist**, detect the OS default and show:
+**If it does NOT exist**, detect the OS default and show:
 ```
 Where do you want to save test outputs?
 
@@ -43,12 +45,12 @@ Where do you want to save test outputs?
 - If [1] → use the default path
 - If [2] → ask: "Enter the base folder path (WWMobileTestAgentAIResults will be created inside it):"
   - Resolve `~` or `%USERPROFILE%` to absolute path
-- **Immediately** write the resolved path to `outputdirectory.txt` in the plugin folder
+- **Immediately** write the resolved path to `~/.claude/ww-mobile-ai-test-agent-outputdir.txt`
 - Store `OUTPUT_DIR` in session memory
 
 ### Create directory structure
 
-After writing `outputdirectory.txt`, create the following structure if it doesn't exist:
+After writing `~/.claude/ww-mobile-ai-test-agent-outputdir.txt`, create the following structure if it doesn't exist:
 ```
 <OUTPUT_DIR>/
   PestPac/
@@ -57,32 +59,64 @@ After writing `outputdirectory.txt`, create the following structure if it doesn'
     reports/
     nav_maps/
     test-pom-generated/
-    test-manual-workflow/
+    test-workflow/
     test-ticket-driven/
+    auto-generated-scripts/helpers/ios/
+    auto-generated-scripts/helpers/android/
+    auto-generated-scripts/ticket-tests-scripts/ios/
+    auto-generated-scripts/ticket-tests-scripts/android/
+    auto-generated-scripts/pom-tests-scripts/ios/
+    auto-generated-scripts/pom-tests-scripts/android/
+    auto-generated-scripts/workflow-tests-scripts/ios/
+    auto-generated-scripts/workflow-tests-scripts/android/
   RealGreen/
     builds/
     credentials/
     reports/
     nav_maps/
     test-pom-generated/
-    test-manual-workflow/
+    test-workflow/
     test-ticket-driven/
+    auto-generated-scripts/helpers/ios/
+    auto-generated-scripts/helpers/android/
+    auto-generated-scripts/ticket-tests-scripts/ios/
+    auto-generated-scripts/ticket-tests-scripts/android/
+    auto-generated-scripts/pom-tests-scripts/ios/
+    auto-generated-scripts/pom-tests-scripts/android/
+    auto-generated-scripts/workflow-tests-scripts/ios/
+    auto-generated-scripts/workflow-tests-scripts/android/
   WinTeam/
     builds/
     credentials/
     reports/
     nav_maps/
     test-pom-generated/
-    test-manual-workflow/
+    test-workflow/
     test-ticket-driven/
+    auto-generated-scripts/helpers/ios/
+    auto-generated-scripts/helpers/android/
+    auto-generated-scripts/ticket-tests-scripts/ios/
+    auto-generated-scripts/ticket-tests-scripts/android/
+    auto-generated-scripts/pom-tests-scripts/ios/
+    auto-generated-scripts/pom-tests-scripts/android/
+    auto-generated-scripts/workflow-tests-scripts/ios/
+    auto-generated-scripts/workflow-tests-scripts/android/
   RouteManager/
     builds/
     credentials/
     reports/
     nav_maps/
     test-pom-generated/
-    test-manual-workflow/
+    test-workflow/
     test-ticket-driven/
+    auto-generated-scripts/helpers/ios/
+    auto-generated-scripts/helpers/android/
+    auto-generated-scripts/ticket-tests-scripts/ios/
+    auto-generated-scripts/ticket-tests-scripts/android/
+    auto-generated-scripts/pom-tests-scripts/ios/
+    auto-generated-scripts/pom-tests-scripts/android/
+    auto-generated-scripts/workflow-tests-scripts/ios/
+    auto-generated-scripts/workflow-tests-scripts/android/
 ```
 
 Store `OUTPUT_DIR: <absolute_path>` in session memory.
@@ -390,14 +424,16 @@ How do you want to build the navigation map?
 ```
 Select testing mode:
 
-  [1] Ticket-Driven Test      — test a specific Jira ticket's acceptance criteria
-  [2] POM Auto-Generation     — generate Page Object Model tests for all screens
+  [1] Ticket-Driven Test    — test a specific Jira ticket's acceptance criteria
+  [2] POM Auto-Generation   — generate Page Object Model tests for all screens
   [3] Workflow Test         — run a structured test workflow from a markdown file
+  [4] Regression Test       — full stability and navigation regression on all screens
 ```
 
 **If [1]** → use `ticket-test` skill
 **If [2]** → use `pom-test` skill
 **If [3]** → use `workflow-test` skill
+**If [4]** → use `regression-test` skill
 
 ---
 

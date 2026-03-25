@@ -1,8 +1,8 @@
 ---
-name: regression
+name: regression-test
 description: "Run a full regression suite — smoke pass, navigation regression across all screens, and crash monitoring via device logs. Follows QA best practices."
 ---
-> **Output directory:** Read `OUTPUT_DIR` from session memory (set by session-wizard Step 0). Use `$OUTPUT_DIR/<project>/` for all file paths instead of `projects/<project>/`.
+> **Session data:** Read `OUTPUT_DIR`, `project`, `platform`, `udid`, and `config` from session memory (set by session-wizard). If any value is missing → load from `$OUTPUT_DIR/<project>/config.json` directly before proceeding.
 
 
 # Regression Testing
