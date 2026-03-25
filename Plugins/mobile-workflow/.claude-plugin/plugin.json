@@ -1,5 +1,5 @@
 {
-  "name": "mobile-ui-builder",
+  "name": "mobile-workflow",
   "description": "Validates and generates iOS storyboards and Android layouts. Includes code-convention and jira-to-implementation skills.",
   "version": "1.0.0",
   "mcpServers": "./.mcp.json"
