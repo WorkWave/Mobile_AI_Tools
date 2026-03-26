@@ -321,6 +321,16 @@ def _build_view(
         attrs["spacing"]      = str(vdata.get("spacing", 8))
         attrs["distribution"] = vdata.get("distribution", "fill")
         attrs["alignment"]    = vdata.get("alignment", "fill")
+    elif tag == "tableView":
+        attrs["clipsSubviews"]        = "YES"
+        attrs["alwaysBounceVertical"] = "YES"
+        attrs["dataMode"]             = vdata.get("dataMode", "prototypes")
+        attrs["style"]                = vdata.get("tableStyle", "plain")
+        attrs["separatorStyle"]       = vdata.get("separatorStyle", "default")
+        attrs["rowHeight"]            = str(vdata.get("rowHeight", -1))
+        attrs["estimatedRowHeight"]   = str(vdata.get("estimatedRowHeight", -1))
+        attrs["sectionHeaderHeight"]  = "28"
+        attrs["sectionFooterHeight"]  = "28"
 
     if vdata.get("isHidden"):
         attrs["hidden"] = "YES"
@@ -354,8 +364,9 @@ def _build_view(
     if tag == "button" and (txt := vdata.get("title") or vdata.get("text")):
         ET.SubElement(view_el, "state", {"key": "normal", "title": txt})
 
-    # Subviews (recursive)
-    if subviews := vdata.get("subviews"):
+    # Subviews (recursive) — UITableView must be empty in storyboard XML;
+    # cells are registered and dequeued in code, never declared as subviews.
+    if tag != "tableView" and (subviews := vdata.get("subviews")):
         sub_el = ET.SubElement(view_el, "subviews")
         sub_constraints: list[dict] = []
         for sv in subviews:

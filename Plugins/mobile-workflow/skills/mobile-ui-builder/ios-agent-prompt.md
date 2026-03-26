@@ -27,6 +27,29 @@ image assets for one screen. Work only inside iOS project files — do not touch
   - `UIScrollView` → pinned to safeAreaLayoutGuide (top/bottom/leading/trailing)
   - Content `UIView` inside scroll view → equal width to scroll view; height is `≥` the scroll view height (allows growth)
   - Never put UI elements directly as siblings of `UIScrollView` unless they are intentionally fixed (e.g. a floating action button)
+  - **REQUIRED: Scroll view layout guide storyboard XML.** The layout guides that define the scroll view's content and frame size MUST use `<viewLayoutGuide>` — NOT `<scrollViewContentLayoutGuide>` or `<scrollViewFrameLayoutGuide>` (those are invalid and cause Xcode to refuse to open the file with "Failed to unarchive element"). Correct form:
+    ```xml
+    <scrollView translatesAutoresizingMaskIntoConstraints="NO" id="SCV-01">
+        <subviews>
+            <view translatesAutoresizingMaskIntoConstraints="NO" id="CNT-01">
+                <!-- content here -->
+            </view>
+        </subviews>
+        <constraints>
+            <!-- pin contentView to contentLayoutGuide (defines scroll content size) -->
+            <constraint firstItem="CNT-01" firstAttribute="top"      secondItem="CLG-01" secondAttribute="top"      id="c1"/>
+            <constraint firstItem="CNT-01" firstAttribute="leading"  secondItem="CLG-01" secondAttribute="leading"  id="c2"/>
+            <constraint firstItem="CNT-01" firstAttribute="trailing" secondItem="CLG-01" secondAttribute="trailing" id="c3"/>
+            <constraint firstItem="CNT-01" firstAttribute="bottom"   secondItem="CLG-01" secondAttribute="bottom"   id="c4"/>
+            <!-- equal width to frameLayoutGuide → no horizontal scrolling -->
+            <constraint firstItem="CNT-01" firstAttribute="width"  secondItem="FLG-01" secondAttribute="width"  id="c5"/>
+            <!-- height ≥ frameLayoutGuide → centres in portrait, scrolls in landscape -->
+            <constraint firstItem="CNT-01" firstAttribute="height" secondItem="FLG-01" secondAttribute="height" relation="greaterThanOrEqual" id="c6"/>
+        </constraints>
+        <viewLayoutGuide key="contentLayoutGuide" id="CLG-01"/>
+        <viewLayoutGuide key="frameLayoutGuide"   id="FLG-01"/>
+    </scrollView>
+    ```
 - Avoid fixed height constraints on containers that hold variable content
 - Use leading/trailing (not left/right) constraints for RTL compatibility
 - `translatesAutoresizingMaskIntoConstraints="NO"` on all views
