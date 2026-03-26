@@ -39,8 +39,10 @@ drawable assets for one screen. Work only inside Android project files — do no
 - Use `@color/`, `@string/`, `@dimen/` resource references — no hardcoded values
 - Asset format: icons/logos → format="svg" (converted to AVD XML in drawable/); photos → format="png" in drawable-xxhdpi/
 - Vector drawables go in `drawable/` (NOT `drawable-xxhdpi/`)
-- View IDs use snake_case (e.g. `close_button`, `chat_list_view`)
-- **Prefer Material Components** over plain equivalents where available: `TextInputLayout`+`TextInputEditText` over `EditText`, `MaterialButton` over `Button` for styled buttons
+- View IDs use snake_case (e.g. `close_button`, `chat_recycler_view`)
+- **Layout files use `.xml` extension** — never `.axml` (Xamarin legacy). Always generate `name.xml`, not `name.axml`.
+- **Prefer `RecyclerView` over `ListView`** for all scrollable lists (chat messages, item feeds, search results)
+- **Prefer Material Components** over plain equivalents where available: `TextInputLayout`+`TextInputEditText` over `EditText`, `MaterialButton` over `Button` for styled buttons, `Chip` for suggestion chips
 
 ## Your tasks — execute in order
 

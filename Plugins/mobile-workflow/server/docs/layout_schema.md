@@ -371,38 +371,26 @@ The `strings` dict contains key→value pairs to be added to `AppStrings.resx` (
 
 #### Allowed View Types
 
-These types are available in this project without external dependencies:
+| Type | XML tag | Notes |
+|---|---|---|
+| `androidx.constraintlayout.widget.ConstraintLayout` | `ConstraintLayout` | **Preferred** for complex layouts and chat screens |
+| `androidx.recyclerview.widget.RecyclerView` | `RecyclerView` | **Preferred** over ListView for all scrollable lists |
+| `LinearLayout` | `LinearLayout` | Use for simple linear flows |
+| `RelativeLayout` | `RelativeLayout` | Use when ConstraintLayout is overkill |
+| `FrameLayout` | `FrameLayout` | Use for overlays and stacked views |
+| `ScrollView` / `HorizontalScrollView` | — | Wraps a single child |
+| `Button` | `Button` | Plain button (prefer `MaterialButton` for styled) |
+| `com.google.android.material.button.MaterialButton` | `MaterialButton` | Preferred for styled/chip buttons |
+| `EditText` | `EditText` | Plain input (prefer `TextInputLayout` for styled) |
+| `com.google.android.material.textfield.TextInputLayout` | `TextInputLayout` | Preferred for styled inputs |
+| `com.google.android.material.textfield.TextInputEditText` | `TextInputEditText` | Use inside TextInputLayout |
+| `com.google.android.material.chip.Chip` | `Chip` | Use for suggestion/filter chips |
+| `TextView` | `TextView` | — |
+| `ImageView` | `ImageView` | — |
+| `androidx.cardview.widget.CardView` | `CardView` | — |
+| `ListView` | `ListView` | Legacy — use RecyclerView instead |
 
-| Type | XML tag |
-|---|---|
-| `Button` | `Button` |
-| `EditText` | `EditText` |
-| `TextView` | `TextView` |
-| `ImageView` | `ImageView` |
-| `LinearLayout` | `LinearLayout` |
-| `RelativeLayout` | `RelativeLayout` |
-| `ScrollView` | `ScrollView` |
-| `HorizontalScrollView` | `HorizontalScrollView` |
-| `FrameLayout` | `FrameLayout` |
-| `ListView` | `ListView` |
-| `androidx.cardview.widget.CardView` | `androidx.cardview.widget.CardView` |
-
-#### Forbidden View Types
-
-Do NOT use these — they are not available in this project:
-
-| Forbidden type | Use instead |
-|---|---|
-| `ConstraintLayout` | `RelativeLayout` or `LinearLayout` |
-| `MaterialButton` | `Button` |
-| `TextInputLayout` | `EditText` |
-| `TextInputEditText` | `EditText` |
-| `RecyclerView` | `ListView` |
-| `CoordinatorLayout` | `LinearLayout` or `FrameLayout` |
-| `MaterialCardView` | `androidx.cardview.widget.CardView` |
-| `Toolbar` | (use the Activity's built-in ActionBar) |
-
-The generator emits a warning (not an error) for forbidden types — but they will fail at build time if the dependency is absent.
+The generator emits a warning for types requiring external dependencies (ConstraintLayout, RecyclerView, Material). These warnings are informational — verify the dependency is present in the project before using. In this project all of the above are available.
 
 ---
 

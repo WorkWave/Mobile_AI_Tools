@@ -102,7 +102,7 @@ The response from `get_design_context` is always React+Tailwind. Use this table 
 | `justify-between` | UIStackView `distribution=equalSpacing` | spacer views with `layout_weight=1` |
 | `opacity-*` | `alpha` 0.0–1.0 | `alpha` attribute |
 
-**Android constraint:** This project does NOT have ConstraintLayout or Material Components. Use only `RelativeLayout`, `LinearLayout`, `ScrollView`, `Button`, `EditText`, `ListView`, `androidx.cardview.widget.CardView`. Never emit `ConstraintLayout`, `MaterialButton`, `TextInputLayout`, or `TextInputEditText`.
+**Android:** Use `ConstraintLayout` for complex layouts and chat/fixed-header-footer screens. Use `RecyclerView` for scrollable lists (chat messages, item feeds) — prefer it over `ListView`. Material Components (`MaterialButton`, `TextInputLayout`, `Chip`) are available — prefer them over plain equivalents.
 
 ---
 
