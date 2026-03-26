@@ -1,16 +1,17 @@
 ---
 name: automated-screen-discovery
-description: After login, systematically explore the running app via Appium to map all screens, navigation hierarchy, and interactive elements. Saves to appium_navigation_map.json, then merges into navigation_map.json. Skip if map already exists and app commit hash hasn't changed.
+description: After login, systematically explore the running app via Appium to map all screens, navigation hierarchy, and interactive elements. Saves to appium_navigation_map_<platform>.json, then merges into navigation_map_<platform>.json. Skip if map already exists and app commit hash hasn't changed.
 ---
 
 > **Session data:** Read `OUTPUT_DIR`, `project`, `platform`, `udid`, and `config` from session memory (set by session-wizard). If any value is missing → load from `$OUTPUT_DIR/<project>/config.json` directly before proceeding.
 
 ## Pre-flight Check
 
-1. Check if `$OUTPUT_DIR/<project>/nav_maps/appium_navigation_map.json` exists
-2. If it does, ask:
+1. Read `platform` from session memory (ios or android)
+2. Check if `$OUTPUT_DIR/<project>/nav_maps/appium_navigation_map_<platform>.json` exists
+3. If it does, ask:
 ```
-An Appium navigation map already exists (last analyzed: <date>, <N> screens).
+An Appium navigation map already exists for <platform> (last analyzed: <date>, <N> screens).
 Update it? (yes/no)
 ```
 If no → skip this skill entirely.
@@ -73,10 +74,8 @@ If login fails → report: "Login failed. Check credentials or network." and sto
 ### Speed Rules (critical — follow strictly)
 - No screenshots — they are slow and not needed for the nav map
 - One `get_page_source` per screen — parse everything from it, never call it twice for the same screen
-- Max depth: 2 levels from tab bar (tab → screen → one sub-screen)
-- Max screens: 60 total
 - 2s wait after each tap (not 5s or 10s)
-- Skip screen if it matches a title already visited
+- Skip screen if it matches a title already visited — the visited set is the only loop guard
 - Skip non-navigable elements: images, static text, dividers, disabled buttons
 
 ### Exploration Algorithm
@@ -98,7 +97,7 @@ for each item in queue:
   5. if screen_title already in visited → go back, skip
   6. record screen (see format below)
   7. visited.add(screen_title)
-  8. if depth < 2: add navigable buttons/cells to queue (max 5 per screen)
+  8. add navigable buttons/cells to queue (max 5 per screen)
   9. go back: iOS = swipe right from x=20, or tap Back button
               Android = mcp__appium__mobile_press_key BACK
 ```
@@ -112,9 +111,9 @@ Only add to queue if element:
 
 ---
 
-## Step 4 — Save to appium_navigation_map.json
+## Step 4 — Save to appium_navigation_map_<platform>.json
 
-Write to `$OUTPUT_DIR/<project>/nav_maps/appium_navigation_map.json`:
+Write to `$OUTPUT_DIR/<project>/nav_maps/appium_navigation_map_<platform>.json` (where `<platform>` is `ios` or `android` from session memory):
 
 ```json
 {
@@ -146,21 +145,21 @@ Write to `$OUTPUT_DIR/<project>/nav_maps/appium_navigation_map.json`:
 
 ---
 
-## Step 5 — Merge into navigation_map.json
+## Step 5 — Merge into navigation_map_<platform>.json
 
 Check what exists in `$OUTPUT_DIR/<project>/nav_maps/`:
 
-**If `codebase_navigation_map.json` also exists → merge both:**
+**If `codebase_navigation_map_<platform>.json` also exists → merge both:**
 
 Merge strategy:
-- Start from `codebase_navigation_map.json` as base (richer structure: routes, ViewModels, architecture)
-- For each screen in `appium_navigation_map.json`:
-  - If screen exists in codebase map → enrich `interactive_elements` with appium findings, keep codebase `path`/`route`/`viewmodel`
+- Start from `codebase_navigation_map_<platform>.json` as base (richer structure: native navigation type, class names, paths)
+- For each screen in `appium_navigation_map_<platform>.json`:
+  - If screen exists in codebase map → enrich `interactive_elements` with appium findings, keep codebase `path`/`navigation_type`/`class`
   - If screen exists only in appium → add it to the merged map with a note `"source": "appium_only"`
 - For screens only in codebase → keep as-is with `"source": "codebase_only"`
-- Set `"discovery_method": "merged"`, `"last_analyzed": <now>`, `"total_screens": <combined count>`
+- Set `"discovery_method": "merged"`, `"last_analyzed": <now>`, `"total_screens": <combined count>`, `"platform": "<platform>"`
 
-**If `navigation_map.json` exists but NO `codebase_navigation_map.json` → smart update:**
+**If `navigation_map_<platform>.json` exists but NO `codebase_navigation_map_<platform>.json` → smart update:**
 
 Do NOT overwrite. Merge the new appium findings into the existing map:
 
@@ -179,7 +178,7 @@ Do NOT overwrite. Merge the new appium findings into the existing map:
 **Screen presence rules:**
 - Screen exists in both → apply per-field rules above
 - Screen only in new appium map → add it with `"source": "appium_only"`
-- Screen only in existing `navigation_map.json` → keep as-is, do NOT remove
+- Screen only in existing `navigation_map_<platform>.json` → keep as-is, do NOT remove
 
 **Top-level fields to update:**
 - `last_analyzed` → update to now
@@ -188,11 +187,11 @@ Do NOT overwrite. Merge the new appium findings into the existing map:
 - `architecture.tab_bar_items` → union with new tabs found (add any new ones, keep existing)
 - `commit_hash` → update if a newer hash is available
 
-**If `navigation_map.json` does NOT exist and no codebase map either:**
+**If `navigation_map_<platform>.json` does NOT exist and no codebase map either:**
 
-Copy `appium_navigation_map.json` as-is to `navigation_map.json`.
+Copy `appium_navigation_map_<platform>.json` as-is to `navigation_map_<platform>.json`.
 
-**Write result to `$OUTPUT_DIR/<project>/nav_maps/navigation_map.json`.**
+**Write result to `$OUTPUT_DIR/<project>/nav_maps/navigation_map_<platform>.json`.**
 
 ---
 
@@ -204,6 +203,6 @@ Report:
 ```
 ✅ Appium screen discovery complete
    Screens mapped   : N
-   Appium map saved : $OUTPUT_DIR/<project>/nav_maps/appium_navigation_map.json
-   Nav map updated  : $OUTPUT_DIR/<project>/nav_maps/navigation_map.json  (merged | copied)
+   Appium map saved : $OUTPUT_DIR/<project>/nav_maps/appium_navigation_map_<platform>.json
+   Nav map updated  : $OUTPUT_DIR/<project>/nav_maps/navigation_map_<platform>.json  (merged | copied)
 ```

@@ -185,7 +185,7 @@ For each phase, for each step:
    - "Enter <field>: <value>" → find by AccessibilityId, clear, send_keys
    - "Tap <button>" → find by AccessibilityId, click, run permission safety net
    - "Verify <condition>" → find element (5s timeout), assert visible
-   - "Navigate to <section>" → follow navigation_map path via go_to_tab or navigation helpers
+   - "Navigate to <section>" → follow path from `navigation_map_<platform>.json` via go_to_tab or navigation helpers
    - "Take a screenshot" → save to `$OUTPUT_DIR/<project>/reports/screenshots/`
 
 2. Log after each step: ✅ PASS or ❌ FAIL + screenshot path
@@ -230,7 +230,7 @@ Device              : <deviceName> (<udid>)
 Account             : <account label>
 
 To rerun on a new build: update UDID / BUNDLE_ID at the top.
-Run: python <workflow_filename>.py
+Run: python3 <workflow_filename>.py
 """
 import sys, os, time
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))

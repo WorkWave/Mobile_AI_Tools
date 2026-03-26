@@ -122,14 +122,14 @@ Runs a structured test workflow defined in a markdown file.
 
 ## Navigation Map
 
-The navigation map (`navigation_map.json`) is built by one or both discovery methods and merged automatically:
+Navigation maps are platform-specific (iOS and Android). Each discovery method produces its own file; the final merged map is per-platform:
 
 | Method | Description | Output file |
 |--------|-------------|------------|
-| **Automated Screen Discovery** | Explores the running app via Appium post-login | `appium_navigation_map.json` |
-| **Codebase Screen Discovery** | Analyzes the `.NET Xamarin/MAUI` repository on the `dev` branch | `codebase_navigation_map.json` |
+| **Automated Screen Discovery** | Explores the running app via Appium post-login | `appium_navigation_map_ios.json` / `appium_navigation_map_android.json` |
+| **Codebase Screen Discovery** | Analyzes the .NET Android native and .NET iOS native repositories on the `dev` branch | `codebase_navigation_map_android.json` / `codebase_navigation_map_ios.json` |
 
-When both maps exist they are merged: the codebase map provides routes, ViewModels and architecture; the Appium map enriches interactive elements. The merged result is saved to `navigation_map.json`.
+When both maps exist they are merged per-platform: the codebase map provides routes, native navigation type, and class names; the Appium map enriches interactive elements. The merged result is saved to `navigation_map_ios.json` and `navigation_map_android.json`.
 
 Codebase discovery is skipped automatically if the git commit hash hasn't changed since the last analysis.
 
@@ -149,9 +149,12 @@ WWMobileTestAgentAIResults/
 │   ├── reports/                    ← QA reports (.md files with timestamps)
 │   │   └── screenshots/            ← failure screenshots
 │   ├── nav_maps/                   ← navigation maps
-│   │   ├── navigation_map.json
-│   │   ├── appium_navigation_map.json
-│   │   └── codebase_navigation_map.json
+│   │   ├── navigation_map_ios.json
+│   │   ├── navigation_map_android.json
+│   │   ├── appium_navigation_map_ios.json
+│   │   ├── appium_navigation_map_android.json
+│   │   ├── codebase_navigation_map_ios.json
+│   │   └── codebase_navigation_map_android.json
 │   ├── test-pom-generated/         ← POM pytest files (pytest + appium-python-client)
 │   ├── test-workflow/              ← test workflow markdown files
 │   ├── test-ticket-driven/         ← reusable workflow files generated from ticket tests
@@ -213,7 +216,7 @@ The mapping is persisted to `$OUTPUT_DIR/firebase_keys.json` and reused in futur
 
 After every test run (ticket, POM, or workflow), the agent generates standalone Python scripts under `auto-generated-scripts/`. These scripts:
 
-- Run outside Claude Code with a single `python script.py` command
+- Run outside Claude Code with a single `python3 script.py` command
 - Use shared helpers (`helpers/session.py`, `helpers/login.py`, `helpers/navigation.py`) with platform-specific factories (`helpers/ios/`, `helpers/android/`)
 - Are regenerated on each run (latest run = most accurate)
 - Shared helper files are never overwritten — only new functions are appended

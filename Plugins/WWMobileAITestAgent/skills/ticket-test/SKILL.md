@@ -56,8 +56,8 @@ If a branch is found (e.g. `feature/PROJ-1234-new-schedule-view`):
 Use a subagent to:
 1. `git -C <localRepoPath> fetch origin`
 2. `git -C <localRepoPath> diff origin/dev...origin/<branch> --name-only`
-3. Identify changed files and map them to screens in `navigation_map.json`
-4. Create a temporary navigation patch for this session (do NOT overwrite navigation_map.json)
+3. Identify changed files and map them to screens in `navigation_map_<platform>.json`
+4. Create a temporary navigation patch for this session (do NOT overwrite navigation_map_<platform>.json)
 
 Show:
 ```
@@ -66,7 +66,7 @@ Affected screens detected from branch diff:
   - NewJobModal  (route: Jobs/Create)
 ```
 
-If no branch found → use the ticket title/description keywords to search navigation_map.json for likely screens.
+If no branch found → use the ticket title/description keywords to search `navigation_map_<platform>.json` for likely screens.
 
 ## Step 4 — Parse Acceptance Criteria
 
@@ -152,7 +152,7 @@ for btn in ["Allow", "Allow While Using App", "Allow Once", "OK", "Continue", "G
 ### Test Execution
 
 For each AC:
-1. Navigate to the affected screen using the navigation path from `navigation_map.json`
+1. Navigate to the affected screen using the navigation path from `navigation_map_<platform>.json`
 2. Perform the action described in the AC
 3. Assert the expected outcome using targeted element finds
 4. Run permission safety net if navigation triggered a new screen
@@ -460,7 +460,7 @@ Device    : <deviceName> (<udid>)
 Account   : <account label>
 
 To rerun on a new build: update UDID / BUNDLE_ID below.
-Run: python test_<TICKET_ID>.py
+Run: python3 test_<TICKET_ID>.py
 """
 import sys, os, time
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))

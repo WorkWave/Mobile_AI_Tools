@@ -408,14 +408,14 @@ How do you want to build the navigation map?
 
   [1] Automated Screen Discovery  — explore the running app via Appium (after login)
   [2] Codebase Screen Discovery   — analyze the repository source code
-  [3] Skip                        — use existing navigation_map.json if available
+  [3] Skip                        — use existing navigation_map_<platform>.json if available
 ```
 
 **If [1]** → use `automated-screen-discovery` skill
 **If [2]** → use `codebase-screen-discovery` skill
-**If [3]** → check if `$OUTPUT_DIR/<project>/nav_maps/navigation_map.json` exists
+**If [3]** → check if `$OUTPUT_DIR/<project>/nav_maps/navigation_map_<platform>.json` exists
   - If yes → load it silently
-  - If no → warn: "No navigation map found. Some test features will be limited. Consider running discovery later."
+  - If no → warn: "No navigation map found for <platform>. Some test features will be limited. Consider running discovery later."
 
 ---
 

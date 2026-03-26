@@ -1,6 +1,6 @@
 ---
 name: pom-test
-description: Generate Page Object Model test files for every screen in navigation_map.json using pytest + appium-python-client. Output to $OUTPUT_DIR/<project>/test-pom-generated/.
+description: Generate Page Object Model test files for every screen in navigation_map_<platform>.json using pytest + appium-python-client. Output to $OUTPUT_DIR/<project>/test-pom-generated/.
 ---
 > **Session data:** Read `OUTPUT_DIR`, `project`, `platform`, `udid`, and `config` from session memory (set by session-wizard). If any value is missing → load from `$OUTPUT_DIR/<project>/config.json` directly before proceeding.
 
@@ -9,9 +9,9 @@ description: Generate Page Object Model test files for every screen in navigatio
 
 ## Pre-flight
 
-Load `$OUTPUT_DIR/<project>/nav_maps/navigation_map.json`. If it doesn't exist:
+Read `platform` from session memory. Load `$OUTPUT_DIR/<project>/nav_maps/navigation_map_<platform>.json`. If it doesn't exist:
 ```
-No navigation map found. Please run screen discovery first:
+No navigation map found for <platform>. Please run screen discovery first:
   [1] Automated Screen Discovery (from running app)
   [2] Codebase Screen Discovery (from repository)
 ```
@@ -175,7 +175,7 @@ class BasePage:
 
 ## Per-Screen Page Object Pattern
 
-For each screen in `navigation_map.json`:
+For each screen in `navigation_map_<platform>.json`:
 
 ```python
 # pages/<screen_snake_case>_page.py
@@ -242,7 +242,7 @@ Generate for BOTH platforms if nav map was built from both, otherwise only for t
 """
 POM Smoke runner — iOS.
 Visits every main tab, asserts it loads. Rerun on any build: update UDID/BUNDLE_ID.
-Run: python run_smoke.py
+Run: python3 run_smoke.py
 """
 import sys, os, time
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
@@ -305,7 +305,7 @@ Same structure. Differences:
 """
 Screen: <ScreenName> — iOS
 Path  : <navigation path>
-Run   : python <screen>.py
+Run   : python3 <screen>.py
 """
 import sys, os, time
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
@@ -356,5 +356,5 @@ Run POM tests (iOS):
   pytest tests/ --platform ios --device-udid <udid> --bundle-id <bundleId> -v
 
 Run autoscripts smoke (iOS):
-  python "$OUTPUT_DIR/<project>/auto-generated-scripts/pom-tests-scripts/ios/run_smoke.py"
+  python3 "$OUTPUT_DIR/<project>/auto-generated-scripts/pom-tests-scripts/ios/run_smoke.py"
 ```

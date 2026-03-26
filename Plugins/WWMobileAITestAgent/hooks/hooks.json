@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "echo 'WWMobileAITestAgent v1.9.0 loaded. Run /start-session to begin testing.'",
+            "command": "echo 'WWMobileAITestAgent v1.10.0 loaded. Run /start-session to begin testing.'",
             "async": false
           }
         ]

@@ -39,7 +39,7 @@ If FAIL → stop regression and report: "App failed to launch or login. Regressi
 
 ## Step 3 — Navigation Regression
 
-Load all screens from `navigation_map.json`. For each screen:
+Read `platform` from session memory. Load all screens from `navigation_map_<platform>.json`. For each screen:
 
 1. Navigate to the screen following its recorded path
 2. Assert the screen loaded:
