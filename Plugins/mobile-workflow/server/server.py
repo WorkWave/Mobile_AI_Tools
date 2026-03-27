@@ -497,10 +497,12 @@ async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
     elif name == "figma_export_to_xcassets":
         token = os.environ.get("FIGMA_TOKEN", "")
         if not token:
-            return _text({"error": (
-                "FIGMA_TOKEN environment variable is not set. "
-                "Add it to the MCP server 'env' config in ~/.claude/claude.json:\n"
-                '  "env": { "FIGMA_TOKEN": "your-token-here" }'
+            return _text({"warning": (
+                "FIGMA_TOKEN is not set — Figma export skipped. "
+                "To enable it, add your token to ~/.claude/settings.json "
+                "(see Step 3 in the plugin README):\n"
+                '  "env": { "FIGMA_TOKEN": "figd_xxxxxxxx..." }\n'
+                "Do NOT use .zshrc — Claude Code may launch without a shell session."
             )})
 
         try:
@@ -721,7 +723,13 @@ async def call_tool(name: str, arguments: dict) -> list[types.TextContent]:
     elif name == "figma_export_to_drawable":
         token = os.environ.get("FIGMA_TOKEN", "")
         if not token:
-            return _text({"error": "FIGMA_TOKEN environment variable is not set."})
+            return _text({"warning": (
+                "FIGMA_TOKEN is not set — Figma export skipped. "
+                "To enable it, add your token to ~/.claude/settings.json "
+                "(see Step 3 in the plugin README):\n"
+                '  "env": { "FIGMA_TOKEN": "figd_xxxxxxxx..." }\n'
+                "Do NOT use .zshrc — Claude Code may launch without a shell session."
+            )})
         try:
             result_data = export_figma_to_drawable(
                 figma_url    = arguments.get("figma_url"),

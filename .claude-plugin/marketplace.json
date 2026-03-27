@@ -7,8 +7,8 @@
   "plugins": [
     {
       "name": "mobile-workflow",
-      "description": "Validates and generates iOS storyboards and Android layouts.",
-      "version": "1.0.0",
+      "description": "End-to-end mobile development workflow for iOS and Android. Skills: mobile-ui-builder (generate + validate storyboards/layouts, landscape safety, scroll view constraints), code-convention, code-review. Commands: pre-implementation (Jira grooming), implement (spec, TDD, refactor, standards/adversarial checks), testing (test, coverage, fixture, debug, analyze), post-implementation (design-doc, PR).",
+      "version": "1.0.4",
       "source": {
         "source": "git-subdir",
         "url": "https://github.com/WorkWave/Mobile_AI_Tools.git",
