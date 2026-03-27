@@ -11,9 +11,188 @@ Dispatch **two parallel specialized agents** — one iOS expert, one Android exp
 
 ---
 
+## Step W — Wizard Mode (activate when no design input is provided)
+
+**Trigger condition:** The user's request does NOT include any of the following:
+- A Figma URL (`figma.com/design/…` or `figma.com/file/…`)
+- A local image or screenshot path
+- An explicit, detailed description of the UI to build (e.g. listing components, layout structure, or visual hierarchy)
+
+If the trigger condition is met, run this wizard **before** Step 0. Do **not** skip to Step 0 and ask for a Figma URL — guide the user through the design definition instead.
+
+---
+
+### W.0 — Platform selection
+
+Ask first with numbered choices:
+
+> "Which platform(s) do you want to generate?
+>
+> 1. iOS only
+> 2. Android only
+> 3. Both iOS and Android"
+
+Carry the answer as `{{platforms}}` and use it throughout the wizard and when dispatching agents — only gather platform-specific inputs (storyboard path / VC class name for iOS; layout path / layout file name for Android) for the selected platform(s).
+
+---
+
+### W.0b — Design reference
+
+Ask immediately after W.0:
+
+> "Do you have a design reference to start from?
+>
+> 1. Yes — I have a **Figma URL** (paste it)
+> 2. Yes — I have a **screenshot or image** (paste the local path, or attach it directly in the chat)
+> 3. No — I'll describe what I want step by step"
+
+**If the user picks 1:** skip W.1–W.8 entirely. Use the Figma URL and continue from **Step 0b** of the normal flow, with `{{platforms}}` already set from W.0.
+
+**If the user picks 2:** skip W.1–W.8 entirely. The image may arrive as:
+- A **local file path** (e.g. `/Users/foo/design.png`) → pass as `{{generation_input}}`
+- An **inline image attachment** in the conversation → treat it as the design input directly; no path needed
+
+Continue from **Step 1** of the normal flow with the image as design source, and `{{platforms}}` already set from W.0.
+
+**If the user picks 3:** continue with W.1–W.8 below.
+
+---
+
+### W.1 — Screen type
+
+Ask the user to pick the screen type. Present the numbered list and wait for their answer:
+
+> "What kind of screen do you want to create? Pick a number or describe it:
+>
+> 1. **List / Feed** — scrollable list of items (jobs, customers, products…)
+> 2. **Detail** — read-only detail view of a single item
+> 3. **Form** — data entry with fields and a save/submit action
+> 4. **Chat / Messaging** — message thread with input bar
+> 5. **Dashboard** — summary tiles, KPIs, or charts
+> 6. **Login / Auth** — login, registration, or PIN entry
+> 7. **Settings / Preferences** — grouped options and toggles
+> 8. **Map** — map view with optional overlays or markers
+> 9. **Other** — describe it"
+
+---
+
+### W.2 — Screen purpose
+
+Ask one focused question based on their choice:
+
+> "In one sentence: what does this screen let the user **do** or **see**?"
+
+---
+
+### W.3 — Key components
+
+Based on the screen type selected in W.1, suggest a default component set and ask the user to confirm, add, or remove items.
+
+Use this mapping for the default suggestion:
+
+| Screen type | Default components to suggest |
+|---|---|
+| List / Feed | Search bar, filter chips, scrollable list rows (title + subtitle + status badge), FAB or toolbar action |
+| Detail | Scrollable content area, section headers, label–value rows, action buttons (primary + secondary) |
+| Form | Navigation bar with Cancel/Save, grouped input fields (text, date picker, dropdown), validation feedback |
+| Chat / Messaging | Fixed header (contact name), scrollable message bubbles (sent/received), typing indicator, text input + send button |
+| Dashboard | Summary cards/tiles, section headers, chart placeholder, quick-action buttons |
+| Login / Auth | Logo/branding area, input fields (email + password), primary CTA button, secondary link (forgot password / register) |
+| Settings / Preferences | Grouped table sections, toggle rows, disclosure rows, section footers |
+| Map | Full-screen map view, search/filter bar overlay, bottom sheet for selected item detail |
+
+Present the suggested components and ask with numbered choices:
+
+> "Here's a default set of components for a **[screen type]** screen:
+> [list from table above]
+>
+> What would you like to do?
+>
+> 1. Looks good — proceed as-is
+> 2. Add one or more components
+> 3. Remove one or more components
+> 4. Replace the list entirely"
+
+If the user picks 2, 3, or 4, collect the change as free text, update the component list, and confirm before continuing.
+
+---
+
+### W.4 — Navigation & header
+
+Ask with numbered choices:
+
+> "What kind of header does this screen have?
+>
+> 1. Standard navigation bar (title + back button)
+> 2. Navigation bar with custom buttons (e.g. Cancel, Save, Edit, +) — specify which
+> 3. Custom header (not a native nav bar) — describe it
+> 4. No header — full-screen / edge-to-edge"
+
+If the user picks 1, 2, or 3, follow up with: "What is the screen **title**?" (free text).
+
+---
+
+### W.5 — Actions & interactions
+
+Ask:
+
+> "What can the user **tap or interact with** on this screen? List the actions (e.g. 'tap a row to open detail', 'swipe to delete', 'tap Save to submit the form')."
+
+---
+
+### W.6 — Data & content
+
+Ask:
+
+> "What **data or content** is displayed? For example: job name, customer address, status badge, timestamp. Give me a few real field names if you have them."
+
+---
+
+### W.7 — Style hints (optional)
+
+Ask with numbered choices:
+
+> "Any style preference?
+>
+> 1. Match the existing app style
+> 2. Custom — I'll describe it (e.g. dark background, accent color #FF6B00)
+> 3. No preference"
+
+If the user picks 2, collect the style description as free text.
+
+---
+
+### W.8 — Confirm and generate layout description
+
+Synthesize the answers from W.1–W.7 into a concise layout description. Present it to the user and ask for confirmation before proceeding:
+
+> "Here's the layout I'll generate:
+>
+> **Screen:** [name based on W.2]
+> **Type:** [W.1 choice]
+> **Structure:** [brief summary of layout hierarchy]
+> **Components:** [confirmed list from W.3]
+> **Header:** [W.4 answer]
+> **Actions:** [W.5 answer]
+> **Data fields:** [W.6 answer]
+> **Style:** [W.7 answer or 'match existing app style']
+>
+> What would you like to do?
+>
+> 1. Looks good — generate the layout
+> 2. Change something — tell me what"
+
+Once confirmed, carry this layout description into Step 0 as `{{wizard_layout_description}}` and use it as the design specification in place of a Figma URL or image. Proceed with the normal flow from Step 0 onward.
+
+**Note:** When dispatching agents in Step 2, pass `{{wizard_layout_description}}` as the `{{generation_input}}` in both agent prompts and leave `{{figma_url}}` and `{{layout_json}}` empty.
+
+---
+
 ## Step 0 — Select platforms
 
-Before gathering any technical inputs, ask:
+**If coming from Wizard Mode (Step W):** platform selection was already captured in W.0 — skip this step and use `{{platforms}}` directly.
+
+**If entering without the wizard** (user provided a Figma URL, image, or explicit description): ask now:
 
 > "Which platform(s) do you want to generate: iOS, Android, or both?"
 
@@ -106,39 +285,130 @@ The response from `get_design_context` is always React+Tailwind. Use this table 
 
 ---
 
-## Step 1 — Gather inputs before dispatching
+## Step 1 — iOS inputs (skip if iOS not selected)
 
-Collect everything both agents will need. **Stop and ask if anything is missing.**
+Ask sequentially. One question at a time — do not dump all questions at once.
 
-| Input | Required by |
-|---|---|
-| Figma URL **or** local image/screenshot path | Both |
-| iOS storyboard path (e.g. `PP.Mobile.IOS/Storyboards/`) | iOS agent |
-| iOS ViewController class name (e.g. `WAIveChatVC`) | iOS agent |
-| Android layout path (e.g. `PP.Mobile.Droid/Resources/layout/`) | Android agent |
-| Android layout file name (e.g. `fragment_waive_chat`) | Android agent |
-| xcassets path (e.g. `PP.Mobile.IOS/Resources/Images.xcassets/`) | iOS agent |
-| Drawable path (e.g. `PP.Mobile.Droid/Resources/drawable/`) | Android agent |
-| Asset names / icon list (if known) | Both |
+**1a — Storyboard path:**
 
-### Clarify ambiguous design requirements before dispatching
+> "Where should the storyboard file be created?
+>
+> 1. I'll type the path (e.g. `RG.Mobile.iOS/Storyboards/`)
+> 2. Scan the project and suggest it for me"
 
-Technical inputs (paths, class names) are not the only thing to clarify. **Also ask about any design elements whose content or behavior is unclear**, even if they are visible in the design.
+If option 2: use Glob to find existing `.storyboard` files and infer the folder. Confirm with the user before proceeding.
 
-Common cases that require clarification:
+**1b — ViewController class name:**
 
-| Visible in design | Ask before assuming |
-|---|---|
-| Interactive elements (buttons, chips, links) | Labels, tap behavior, what message/action they trigger |
-| Lists or repeating items | How many items, where data comes from |
-| Conditional/stateful UI | What triggers show/hide, initial state |
-| Placeholder content | Whether it is real or illustrative |
+> "What is the **ViewController class name** for this screen? (e.g. `JobDetailVC`)"
 
-**Do not implement with assumptions.** If something is visible but its behavior or content is not specified by the user, ask. A quick question before dispatching saves a correction loop after.
+Free text. If the user is unsure, suggest a name based on the screen purpose from W.2 or the design, and let them confirm.
+
+**1c — xcassets path:**
+
+> "Where is the **xcassets** folder?
+>
+> 1. I'll type the path (e.g. `RG.Mobile.iOS/Resources/Images.xcassets/`)
+> 2. Scan the project and suggest it for me"
+
+If option 2: use Glob to find `*.xcassets` folders and confirm.
 
 ---
 
-## Step 2 — Dispatch agents in parallel
+## Step 2 — Android inputs (skip if Android not selected)
+
+Ask sequentially. One question at a time.
+
+**2a — Layout path:**
+
+> "Where should the Android layout file be created?
+>
+> 1. I'll type the path (e.g. `RG.Mobile.Droid/Resources/layout/`)
+> 2. Scan the project and suggest it for me"
+
+If option 2: use Glob to find existing layout XML files and infer the folder. Confirm before proceeding.
+
+**2b — Layout file name:**
+
+> "What should the **layout file be named**? (e.g. `fragment_job_detail`)"
+
+Free text. If the user is unsure, suggest a name derived from the screen purpose following the naming convention (`fragment_`, `activity_`, `dialog_`, `row_`) and let them confirm.
+
+**2c — Drawable path:**
+
+> "Where is the **drawable** folder?
+>
+> 1. I'll type the path (e.g. `RG.Mobile.Droid/Resources/drawable/`)
+> 2. Scan the project and suggest it for me"
+
+If option 2: use Glob to find existing drawable folders and confirm.
+
+---
+
+## Step 3 — Assets (both platforms)
+
+Ask only if the design includes icons, logos, or images:
+
+> "Does this screen use any icons or image assets?
+>
+> 1. Yes — I'll list them (names or descriptions)
+> 2. Yes — extract them automatically from the Figma / image
+> 3. No assets needed"
+
+If option 1: collect as free text. If option 2: agents will extract during generation.
+
+---
+
+## Step 4 — Clarify ambiguous design elements
+
+**Only ask this step if the design source is a Figma URL or image** (i.e. not coming from wizard W.1–W.8 where behavior was already defined).
+
+Review the design and ask about anything that is **visible but behaviorally unclear**:
+
+| Visible in design | Ask before assuming |
+|---|---|
+| Buttons, chips, links | Label text, tap action, what screen it navigates to |
+| Lists or repeating rows | Data source, how many items, empty state |
+| Conditional / stateful UI | What triggers show/hide, initial state |
+| Placeholder text or images | Real content or illustrative only |
+
+Ask all ambiguities in a **single grouped message** — do not send one question per turn. Wait for the user to answer before proceeding.
+
+**Do not implement with assumptions.** A quick question before dispatching saves a correction loop after.
+
+---
+
+## Step 5 — Pre-dispatch summary and confirmation
+
+Before dispatching agents, show a full summary and ask for confirmation:
+
+> "Here's what I'm about to generate:
+>
+> **Platform(s):** [{{platforms}}]
+> **Design source:** [Figma URL / image path / wizard description]
+> **Screen:** [name / purpose]
+>
+> [If iOS selected]
+> **iOS storyboard:** `[path]/[ViewController].storyboard`
+> **ViewController class:** `[ViewController]`
+> **xcassets:** `[path]`
+>
+> [If Android selected]
+> **Android layout:** `[path]/[layout_name].xml`
+> **Drawable:** `[path]`
+>
+> **Assets:** [list or 'none']
+>
+> Ready to generate?
+>
+> 1. Yes — dispatch agents now
+> 2. No — I need to change something"
+
+If option 2: ask what to change, update the relevant input, and re-show the summary.
+
+---
+
+## Step 6 — Dispatch agents in parallel
 
 Use the `Agent` tool twice **in a single message** (parallel dispatch). Pass the filled-in prompt from `ios-agent-prompt.md` and `android-agent-prompt.md`.
 
@@ -152,12 +422,32 @@ See `ios-agent-prompt.md` and `android-agent-prompt.md` for the exact prompt tem
 
 ---
 
-## Step 3 — Review and report
+## Step 7 — Review and report
 
-When both agents return:
-1. Summarize what each agent generated (file paths, outlets/IDs, validation status)
-2. Flag any unresolved issues or discrepancies between platforms
-3. List any next steps (e.g. wiring outlets in code, adding localized strings)
+When both agents return, present the results as a structured summary:
+
+> "**Generation complete.**
+>
+> [If iOS]
+> **iOS**
+> - Storyboard: `[file path]`
+> - Outlets: [list]
+> - Validation: ✅ passed / ⚠️ [issues]
+>
+> [If Android]
+> **Android**
+> - Layout: `[file path]`
+> - View IDs: [list]
+> - Validation: ✅ passed / ⚠️ [issues]
+>
+> **Next steps:**
+> [numbered list — e.g. wire outlets in code, add localized strings, implement ViewModel bindings]
+>
+> What would you like to do?
+>
+> 1. Done — everything looks good
+> 2. Fix a reported issue
+> 3. Adjust the layout and regenerate"
 
 ---
 

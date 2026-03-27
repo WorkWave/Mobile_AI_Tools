@@ -1,6 +1,6 @@
 {
   "name": "mobile-workflow",
   "description": "End-to-end mobile development workflow for iOS and Android. Skills: mobile-ui-builder (generate + validate storyboards/layouts, landscape safety, scroll view constraints), code-convention, code-review. Commands: pre-implementation (Jira grooming), implement (spec, TDD, refactor, standards/adversarial checks), testing (test, coverage, fixture, debug, analyze), post-implementation (design-doc, PR).",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "mcpServers": "./.mcp.json"
 }
