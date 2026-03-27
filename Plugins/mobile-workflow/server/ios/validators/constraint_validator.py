@@ -152,6 +152,26 @@ def _check_scene(scene: ET.Element, all_ids: set[str]) -> list[Issue]:
             except ValueError:
                 pass
 
+    # ── 3b. Negative constants ────────────────────────────────────────────────
+    # Apple's Auto Layout documentation forbids negative constant values.
+    # If a gap requires a negative constant (e.g. viewA.trailing = viewB.leading - 8),
+    # reverse the relationship instead: viewB.leading = viewA.trailing + 8.
+    for c in constraints:
+        const_str = c.get("constant", "0")
+        try:
+            if float(const_str) < 0:
+                cid = c.get("id", "unknown")
+                issues.append(Issue(
+                    "error",
+                    f"Constraint id='{cid}' has a negative constant='{const_str}'. "
+                    "Negative constants are not allowed. Reverse the firstItem/secondItem "
+                    "and firstAttribute/secondAttribute and use a positive constant instead. "
+                    f"e.g. if A.trailing = B.leading - 8, write B.leading = A.trailing + 8.",
+                    element_id=cid,
+                ))
+        except (ValueError, TypeError):
+            pass
+
     # ── 4. Ambiguity analysis ─────────────────────────────────────────────────
     # Views whose layout is fully managed by a UIStackView — skip ambiguity checks
     stack_managed_ids: set[str] = set()

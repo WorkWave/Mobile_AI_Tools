@@ -37,14 +37,24 @@ TYPE_TO_TAG = {
 }
 
 CONSTRAINT_MAP = {
-    "top_to_top":       ("app", "layout_constraintTop_toTopOf"),
-    "top_to_bottom_of": ("app", "layout_constraintTop_toBottomOf"),
-    "bottom_to_bottom": ("app", "layout_constraintBottom_toBottomOf"),
-    "bottom_to_top_of": ("app", "layout_constraintBottom_toTopOf"),
-    "start_to_start":   ("app", "layout_constraintStart_toStartOf"),
-    "start_to_end_of":  ("app", "layout_constraintStart_toEndOf"),
-    "end_to_end":       ("app", "layout_constraintEnd_toEndOf"),
-    "end_to_start_of":  ("app", "layout_constraintEnd_toStartOf"),
+    "top_to_top":               ("app", "layout_constraintTop_toTopOf"),
+    "top_to_bottom_of":         ("app", "layout_constraintTop_toBottomOf"),
+    "bottom_to_bottom":         ("app", "layout_constraintBottom_toBottomOf"),
+    "bottom_to_top_of":         ("app", "layout_constraintBottom_toTopOf"),
+    "start_to_start":           ("app", "layout_constraintStart_toStartOf"),
+    "start_to_end_of":          ("app", "layout_constraintStart_toEndOf"),
+    "end_to_end":               ("app", "layout_constraintEnd_toEndOf"),
+    "end_to_start_of":          ("app", "layout_constraintEnd_toStartOf"),
+    # Baseline alignment (aligns text baselines across sibling views)
+    "baseline_to_baseline_of":  ("app", "layout_constraintBaseline_toBaselineOf"),
+    # Bias — position within constraints (0.0=start, 0.5=center, 1.0=end)
+    "horizontal_bias":          ("app", "layout_constraintHorizontal_bias"),
+    "vertical_bias":            ("app", "layout_constraintVertical_bias"),
+    # Aspect ratio — e.g. "16:9" or "1:1" (set one dimension to 0dp)
+    "dimension_ratio":          ("app", "layout_constraintDimensionRatio"),
+    # Chains — controls how chained views distribute space
+    "horizontal_chain_style":   ("app", "layout_constraintHorizontal_chainStyle"),
+    "vertical_chain_style":     ("app", "layout_constraintVertical_chainStyle"),
 }
 
 MARGIN_MAP = {
@@ -64,6 +74,23 @@ EXTERNAL_DEP_TYPES: set[str] = {
 }
 
 TEXT_STYLE_MAP = {
+    # Material 3 tokens (preferred)
+    "displayLarge":   "?attr/textAppearanceDisplayLarge",
+    "displayMedium":  "?attr/textAppearanceDisplayMedium",
+    "displaySmall":   "?attr/textAppearanceDisplaySmall",
+    "headlineLarge":  "?attr/textAppearanceHeadlineLarge",
+    "headlineMedium": "?attr/textAppearanceHeadlineMedium",
+    "headlineSmall":  "?attr/textAppearanceHeadlineSmall",
+    "titleLarge":     "?attr/textAppearanceTitleLarge",
+    "titleMedium":    "?attr/textAppearanceTitleMedium",
+    "titleSmall":     "?attr/textAppearanceTitleSmall",
+    "bodyLarge":      "?attr/textAppearanceBodyLarge",
+    "bodyMedium":     "?attr/textAppearanceBodyMedium",
+    "bodySmall":      "?attr/textAppearanceBodySmall",
+    "labelLarge":     "?attr/textAppearanceLabelLarge",
+    "labelMedium":    "?attr/textAppearanceLabelMedium",
+    "labelSmall":     "?attr/textAppearanceLabelSmall",
+    # Material 2 aliases (kept for backwards compatibility)
     "headline1": "?attr/textAppearanceHeadline1",
     "headline2": "?attr/textAppearanceHeadline2",
     "headline3": "?attr/textAppearanceHeadline3",
@@ -207,6 +234,32 @@ def _build_view(view: dict, root_layout: str) -> tuple[ET.Element, list[str], bo
     # style
     if style := view.get("style"):
         el.set("style", style)
+
+    # ── Type-specific required attributes ────────────────────────────────────
+
+    # LinearLayout: orientation is REQUIRED — crashes at runtime without it.
+    # Android default is horizontal but vertical is the correct default for forms/lists.
+    if view_type == "LinearLayout":
+        el.set(f"{{{ANDROID_NS}}}orientation", view.get("orientation", "vertical"))
+
+    # ScrollView / HorizontalScrollView: fillViewport stretches content to fill the
+    # viewport when shorter, preventing spurious scrollbars and layout gaps.
+    if view_type in ("ScrollView", "HorizontalScrollView"):
+        el.set(f"{{{ANDROID_NS}}}fillViewport", "true")
+
+    # RecyclerView: layoutManager is REQUIRED — crashes at runtime without it.
+    # clipToPadding=false allows list items to scroll behind transparent system bars.
+    if view_type == "RecyclerView":
+        el.set(f"{{{APP_NS}}}layoutManager",
+               view.get("layout_manager",
+                        "androidx.recyclerview.widget.LinearLayoutManager"))
+        el.set(f"{{{ANDROID_NS}}}clipToPadding",
+               "true" if view.get("clip_to_padding") else "false")
+
+    # ImageView / ShapeableImageView: scaleType must be explicit.
+    # fitCenter is the safe default (never crops); use centerCrop for full-bleed images.
+    if view_type in ("ImageView", "com.google.android.material.imageview.ShapeableImageView"):
+        el.set(f"{{{ANDROID_NS}}}scaleType", view.get("scale_type", "fitCenter"))
 
     # text
     if text := view.get("text"):

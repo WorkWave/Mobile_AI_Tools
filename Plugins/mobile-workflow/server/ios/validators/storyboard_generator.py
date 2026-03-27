@@ -303,7 +303,8 @@ def _build_view(
             attrs["text"] = txt
         if al := vdata.get("textAlignment"):
             attrs["textAlignment"] = al
-        attrs["lineBreakMode"] = vdata.get("lineBreakMode", "middleTruncation")
+        # Apple default is tailTruncation — middleTruncation is only for file paths / URLs
+        attrs["lineBreakMode"] = vdata.get("lineBreakMode", "tailTruncation")
         # Apple HIG: labels must support Dynamic Type (adjustsFontForContentSizeCategory)
         attrs["adjustsFontForContentSizeCategory"] = vdata.get("adjustsFontForContentSizeCategory", "YES")
     elif tag == "button":
@@ -312,6 +313,8 @@ def _build_view(
         if ph := vdata.get("placeholder"):
             attrs["placeholder"] = ph
         attrs["borderStyle"] = vdata.get("borderStyle", "roundedRect")
+        attrs["clearButtonMode"] = vdata.get("clearButtonMode", "whileEditing")
+        attrs["adjustsFontForContentSizeCategory"] = vdata.get("adjustsFontForContentSizeCategory", "YES")
     elif tag == "imageView":
         if img := vdata.get("imageName"):
             attrs["image"] = img
@@ -347,6 +350,23 @@ def _build_view(
     if cc := vdata.get("customClass"):
         attrs["customClass"] = cc
 
+    # UIScrollView: pre-register layout guide IDs so constraints in the Layout JSON
+    # can reference '{sem_id}_contentLayoutGuide' and '{sem_id}_frameLayoutGuide'.
+    scroll_clg_xid: str | None = None
+    scroll_flg_xid: str | None = None
+    if tag == "scrollView":
+        clg_sem = sem_id + "_contentLayoutGuide"
+        flg_sem = sem_id + "_frameLayoutGuide"
+        scroll_clg_xid = _xcode_id(clg_sem, cache)
+        scroll_flg_xid = _xcode_id(flg_sem, cache)
+        view_id_map[clg_sem] = scroll_clg_xid
+        view_id_map[flg_sem] = scroll_flg_xid
+        # Also accept the short aliases the LLM often uses
+        view_id_map[sem_id + "-contentLayoutGuide"] = scroll_clg_xid
+        view_id_map[sem_id + "-frameLayoutGuide"]   = scroll_flg_xid
+        view_id_map["contentLayoutGuide"]           = scroll_clg_xid
+        view_id_map["frameLayoutGuide"]             = scroll_flg_xid
+
     view_el = ET.SubElement(parent_el, tag, attrs)
 
     # Frame placeholder
@@ -364,6 +384,22 @@ def _build_view(
     if tag == "button" and (txt := vdata.get("title") or vdata.get("text")):
         ET.SubElement(view_el, "state", {"key": "normal", "title": txt})
 
+    # UITextField: textInputTraits configures keyboard, autocorrection, and return key.
+    # Apple requires this element for any text field that participates in form entry.
+    if tag == "textField":
+        traits: dict[str, str] = {}
+        if kb := vdata.get("keyboardType"):
+            traits["keyboardType"] = kb
+        if ac := vdata.get("autocapitalizationType"):
+            traits["autocapitalizationType"] = ac
+        if acr := vdata.get("autocorrectionType"):
+            traits["autocorrectionType"] = acr
+        if rk := vdata.get("returnKeyType"):
+            traits["returnKeyType"] = rk
+        if vdata.get("secureTextEntry"):
+            traits["secureTextEntry"] = "YES"
+        ET.SubElement(view_el, "textInputTraits", {"key": "textInputTraits", **traits})
+
     # Subviews (recursive) — UITableView must be empty in storyboard XML;
     # cells are registered and dequeued in code, never declared as subviews.
     if tag != "tableView" and (subviews := vdata.get("subviews")):
@@ -379,6 +415,12 @@ def _build_view(
     # Collect constraints (will be written at root-view level for cross-view constraints)
     for c in vdata.get("constraints", []):
         all_constraints.append({**c, "_first_sem": sem_id, "_parent_sem": parent_sem, "_view_type": tag})
+
+    # UIScrollView: append the two required viewLayoutGuide children.
+    # These MUST appear after <subviews> and <constraints> but before <autoresizingMask>.
+    if tag == "scrollView" and scroll_clg_xid and scroll_flg_xid:
+        ET.SubElement(view_el, "viewLayoutGuide", {"key": "contentLayoutGuide", "id": scroll_clg_xid})
+        ET.SubElement(view_el, "viewLayoutGuide", {"key": "frameLayoutGuide",   "id": scroll_flg_xid})
 
     _add_autoresizing(view_el)
 
@@ -420,6 +462,20 @@ def _write_constraint(parent_el: ET.Element, c: dict, view_id_map: dict[str, str
     if is_image_height:
         relation = "lessThanOrEqual"
 
+    # Auto-correct scroll view content height per Apple's Auto Layout guide:
+    # height = frameLayoutGuide.height must use priority 250 (low), not the default 1000.
+    # A hard equal (priority 1000) pins content to exactly the viewport height, breaking scrolling.
+    # Priority 250 makes it a soft "fill the viewport" hint while letting content grow taller.
+    is_scroll_height = (
+        first_attr == "height"
+        and relation == "equal"
+        and second_sem is not None
+        and ("frameLayoutGuide" in second_sem or second_sem.endswith("_frameLayoutGuide"))
+    )
+    priority = c.get("priority", 1000)
+    if is_scroll_height and priority > 250:
+        priority = 250
+
     attrs: dict[str, str] = {
         "firstItem":      first_xid,
         "firstAttribute": first_attr,
@@ -433,8 +489,8 @@ def _write_constraint(parent_el: ET.Element, c: dict, view_id_map: dict[str, str
         attrs["constant"] = str(const)
     if (mul := c.get("multiplier", 1.0)) != 1.0:
         attrs["multiplier"] = str(mul)
-    if (pri := c.get("priority", 1000)) != 1000:
-        attrs["priority"] = str(pri)
+    if priority != 1000:
+        attrs["priority"] = str(priority)
 
     ET.SubElement(parent_el, "constraint", attrs)
 

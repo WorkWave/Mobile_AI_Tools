@@ -89,6 +89,30 @@ def _check_views(
                             f"'{vid}' references unknown id '{ref_id}'",
                             element_id=vid, rule="broken_reference"))
 
+    # LinearLayout: orientation is required — crashes at runtime without it
+    if el.tag == "LinearLayout" and not el.get(f"{{{ANDROID_NS}}}orientation"):
+        issues.append(Issue("error",
+            f"LinearLayout id='{vid}' is missing android:orientation. "
+            "Add android:orientation=\"vertical\" or \"horizontal\".",
+            element_id=vid, rule="missing_orientation"))
+
+    # RecyclerView: layoutManager is required — crashes at runtime without it
+    if "RecyclerView" in el.tag and not el.get(f"{{{APP_NS}}}layoutManager"):
+        issues.append(Issue("error",
+            f"RecyclerView id='{vid}' is missing app:layoutManager. "
+            "Add app:layoutManager=\"androidx.recyclerview.widget.LinearLayoutManager\" "
+            "(or GridLayoutManager / StaggeredGridLayoutManager).",
+            element_id=vid, rule="missing_layout_manager"))
+
+    # ScrollView: fillViewport should be true so content fills the viewport
+    if el.tag in ("ScrollView", "HorizontalScrollView"):
+        if el.get(f"{{{ANDROID_NS}}}fillViewport") != "true":
+            issues.append(Issue("warning",
+                f"<{el.tag}> id='{vid}' is missing android:fillViewport=\"true\". "
+                "Without it, content shorter than the viewport won't stretch to fill it, "
+                "causing layout gaps and spurious scrollbars.",
+                element_id=vid, rule="scrollview_fill_viewport"))
+
     # Children inherit constraint-check only if THIS element is a ConstraintLayout
     child_parent_is_cl = _is_constraint_layout(el.tag)
     for child in el:

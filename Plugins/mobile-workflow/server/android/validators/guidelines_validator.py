@@ -70,6 +70,15 @@ def _check_element(el: ET.Element, issues: list[Issue]) -> None:
                 "(minimum 48dp touch target)",
                 element_id=vid, rule="touch_target"))
 
+    # ImageView: scaleType must be explicit — the default (matrix) is almost never correct
+    if el.tag in IMAGE_TAGS or tag_short in IMAGE_TAGS:
+        if not el.get(f"{{{ANDROID_NS}}}scaleType"):
+            issues.append(Issue("error",
+                f"<{tag_short}> id='{vid}' is missing android:scaleType. "
+                "Add android:scaleType=\"fitCenter\" (icons/logos) or \"centerCrop\" "
+                "(full-bleed photos). The default scaleType (matrix) clips content unexpectedly.",
+                element_id=vid, rule="missing_scale_type"))
+
     # ScrollView single child
     if tag_short == "ScrollView":
         direct_children = list(el)

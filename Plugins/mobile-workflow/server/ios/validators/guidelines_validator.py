@@ -482,16 +482,16 @@ def _check_scroll_view_constraints(root: ET.Element) -> list[Issue]:
                 elif key == "frameLayoutGuide":
                     frame_guide_id = lg.get("id")
 
-        # No layout guides at all → older-style scroll view; skip constraint checks
-        # but remind the developer to add them.
+        # No layout guides at all → the storyboard generator should have injected them;
+        # their absence means the XML was hand-edited incorrectly.
         if content_guide_id is None and frame_guide_id is None:
             issues.append(Issue(
-                "warning",
-                f"<scrollView> id='{sv_id}' has no viewLayoutGuide children. "
+                "error",
+                f"<scrollView> id='{sv_id}' is missing its viewLayoutGuide children. "
                 "Add <viewLayoutGuide key=\"contentLayoutGuide\" id=\"...\"/> and "
                 "<viewLayoutGuide key=\"frameLayoutGuide\" id=\"...\"/> as direct children "
-                "so Auto Layout can determine the scroll content size. "
-                "Without them the scroll view's content size is ambiguous.",
+                "of the <scrollView> element. Without them Auto Layout cannot determine "
+                "the scroll content size and Xcode will show an ambiguous layout warning.",
                 element_id=sv_id,
                 rule="scrollViewConstraints",
             ))
@@ -512,30 +512,40 @@ def _check_scroll_view_constraints(root: ET.Element) -> list[Issue]:
         # Rule 2: content view width = frameLayoutGuide.width
         if frame_guide_id and not any(_refs(c, frame_guide_id, "width") for c in sv_constraints):
             issues.append(Issue(
-                "warning",
+                "error",
                 f"<scrollView> id='{sv_id}' content view is missing "
                 "width = frameLayoutGuide.width constraint. "
-                "Without it the scroll view may scroll horizontally. "
+                "Without it the scroll view will scroll horizontally. "
                 f"Add: <constraint firstItem=\"[contentView]\" firstAttribute=\"width\" "
                 f"secondItem=\"{frame_guide_id}\" secondAttribute=\"width\"/>",
                 element_id=sv_id,
                 rule="scrollViewConstraints",
             ))
 
-        # Rule 3: content view height >= frameLayoutGuide.height
-        has_height_ge = any(
-            c.get("relation") == "greaterThanOrEqual" and _refs(c, frame_guide_id, "height")
-            for c in sv_constraints
-        )
-        if frame_guide_id and not has_height_ge:
+        # Rule 3: content view height vs frameLayoutGuide must be either:
+        #   a. relation="greaterThanOrEqual" (any priority), OR
+        #   b. relation="equal" with priority <= 250 (Apple-canonical soft constraint)
+        # A hard relation="equal" at priority 1000 pins content to exactly the viewport
+        # height, which breaks scrolling entirely.
+        def _is_valid_height_constraint(c: ET.Element) -> bool:
+            if not _refs(c, frame_guide_id, "height"):
+                return False
+            relation_ = c.get("relation", "equal")
+            priority_ = int(c.get("priority", "1000"))
+            return relation_ == "greaterThanOrEqual" or (relation_ == "equal" and priority_ <= 250)
+
+        has_valid_height = any(_is_valid_height_constraint(c) for c in sv_constraints)
+        if frame_guide_id and not has_valid_height:
             issues.append(Issue(
-                "info",
-                f"<scrollView> id='{sv_id}' content view is missing "
-                "height >= frameLayoutGuide.height constraint. "
-                "Without it the content view won't centre vertically in portrait when shorter "
-                "than the viewport, and may not scroll correctly in landscape. "
-                f"Add: <constraint firstItem=\"[contentView]\" firstAttribute=\"height\" "
-                f"relation=\"greaterThanOrEqual\" secondItem=\"{frame_guide_id}\" secondAttribute=\"height\"/>",
+                "error",
+                f"<scrollView> id='{sv_id}' content view height constraint vs frameLayoutGuide "
+                "is incorrect. Two valid forms per Apple's Auto Layout guide: "
+                "(a) relation=\"greaterThanOrEqual\" — content can grow, fills viewport when shorter; "
+                "(b) relation=\"equal\" priority=\"250\" — Apple-canonical soft constraint, same effect. "
+                "A hard relation=\"equal\" (priority 1000) pins content to exactly the viewport "
+                "height and breaks scrolling. "
+                f"Fix: on the height constraint referencing secondItem=\"{frame_guide_id}\", "
+                "either set relation=\"greaterThanOrEqual\" or add priority=\"250\".",
                 element_id=sv_id,
                 rule="scrollViewConstraints",
             ))
