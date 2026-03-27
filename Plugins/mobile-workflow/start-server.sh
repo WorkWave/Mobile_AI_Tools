@@ -2,26 +2,47 @@
 set -e
 DIR="$(cd "$(dirname "$0")" && pwd)"
 
-# Check Python 3.13+ is available
-if ! command -v python3 &>/dev/null; then
-  echo "[mobile-ui-builder] ERROR: python3 not found." >&2
-  echo "[mobile-ui-builder] Install Python 3.13+ from https://www.python.org/downloads/ or via Homebrew: brew install python@3.13" >&2
-  exit 1
+# Returns 0 if the given python binary is 3.13+
+python_ok() {
+  local bin="$1"
+  command -v "$bin" &>/dev/null || return 1
+  local maj min
+  maj=$("$bin" -c "import sys; print(sys.version_info.major)")
+  min=$("$bin" -c "import sys; print(sys.version_info.minor)")
+  [ "$maj" -gt 3 ] || { [ "$maj" -eq 3 ] && [ "$min" -ge 13 ]; }
+}
+
+# Find a suitable Python 3.13+ binary
+PYTHON3=""
+for candidate in python3.13 python3.14 python3 "$(brew --prefix python@3.13 2>/dev/null)/bin/python3.13"; do
+  if python_ok "$candidate"; then
+    PYTHON3="$candidate"
+    break
+  fi
+done
+
+# If not found, try to install via Homebrew
+if [ -z "$PYTHON3" ]; then
+  if command -v brew &>/dev/null; then
+    echo "[mobile-ui-builder] Python 3.13+ not found. Installing via Homebrew..." >&2
+    brew install python@3.13 >&2
+    BREW_PYTHON="$(brew --prefix python@3.13)/bin/python3.13"
+    if python_ok "$BREW_PYTHON"; then
+      PYTHON3="$BREW_PYTHON"
+    fi
+  fi
 fi
 
-PYTHON_VERSION=$(python3 -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')")
-PYTHON_MAJOR=$(echo "$PYTHON_VERSION" | cut -d. -f1)
-PYTHON_MINOR=$(echo "$PYTHON_VERSION" | cut -d. -f2)
-
-if [ "$PYTHON_MAJOR" -lt 3 ] || { [ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -lt 13 ]; }; then
-  echo "[mobile-ui-builder] ERROR: Python 3.13+ is required (found $PYTHON_VERSION)." >&2
-  echo "[mobile-ui-builder] Install via Homebrew: brew install python@3.13" >&2
+if [ -z "$PYTHON3" ]; then
+  echo "[mobile-ui-builder] ERROR: Python 3.13+ is required and could not be installed automatically." >&2
+  echo "[mobile-ui-builder] Install manually: brew install python@3.13" >&2
+  echo "[mobile-ui-builder] Or download from: https://www.python.org/downloads/" >&2
   exit 1
 fi
 
 if [ ! -d "$DIR/.venv" ]; then
   echo "[mobile-ui-builder] Creating virtual environment..." >&2
-  python3 -m venv "$DIR/.venv"
+  "$PYTHON3" -m venv "$DIR/.venv"
   "$DIR/.venv/bin/pip" install --quiet -r "$DIR/requirements.txt"
   echo "[mobile-ui-builder] Setup complete." >&2
 fi
